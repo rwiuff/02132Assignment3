@@ -1,0 +1,245 @@
+% LTeX: language=en-GB
+%Author(s), Course variables
+\newcommand{\titl}{02132 Assignment 3 report}
+\newcommand{\subtitl}{Implementation of an FSMD-based hardware\\accelerator for the image erosion in Chisel}
+\newcommand{\authone}{Mikkel Arn Andersen}
+\newcommand{\SIDone}{s224187}
+\newcommand{\authtwo}{Niclas Juul Schæffer}
+\newcommand{\SIDtwo}{s224744}
+\newcommand{\auththree}{Rasmus Kronborg Finnemann Wiuff}
+\newcommand{\SIDthree}{s163977}
+\newcommand{\lb}{\\}
+%Basics
+\documentclass[a4paper, english]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[bitstream-charter]{mathdesign}
+\usepackage{babel}
+\usepackage[moderate, mathspacing=normal]{savetrees}
+%Symbols and scientifics
+\usepackage{bm}
+\usepackage{physics}
+\usepackage{mathtools}
+\numberwithin{equation}{section}
+\usepackage{siunitx}
+\sisetup{
+per-mode = power ,
+round-mode = figures ,
+round-precision = 3 ,
+exponent-mode = input ,
+output-decimal-marker = {.} ,
+exponent-product = 	imes ,
+uncertainty-mode = separate ,
+range-phrase = - ,
+range-units =  single ,
+inter-unit-product = \ensuremath{{\cdot{}}} ,
+quantity-product = \ ,
+separate-uncertainty-units = single ,
+}
+
+%Appendix, TOC and Bibliography
+\usepackage{appendix}
+\renewcommand\appendixtocname{Appendix}
+\usepackage[nottoc]{tocbibind}
+\setcounter{tocdepth}{2}
+\usepackage{lastpage}
+
+%Figures
+\usepackage[svgnames]{xcolor} % Required to specify font color
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage[format=plain,
+    labelfont={bf,it,footnotesize},
+    textfont={it,footnotesize}]{caption}
+% \captionsetup[table]{name=Huskeord}
+\captionsetup{font={stretch=0.9}}
+\usepackage{wrapfig}
+\usepackage[a4paper, centering, rmargin=2.5cm, tmargin=2.5cm, lmargin=2.5cm, bmargin=3.5cm]{geometry}
+\usepackage{verbatim}
+\usepackage[space]{grffile}
+\usepackage[final]{pdfpages}
+\usepackage{pdflscape}
+\usepackage{multirow}
+\usepackage{fontawesome}
+\usepackage{tikz}
+% \usetikzlibrary{external}
+% \tikzexternalize[prefix=tikz/]
+\usepackage{circuitikz}
+\ctikzset{logic ports = ieee}
+\usetikzlibrary{positioning}
+\newcommand{\pin}[3]{\node[blue, font = \small, #2] at (#1) {#3};
+                     \coordinate (#3) at (#1);}
+\newcommand{\port}[4]{\node[circ, #2] (#1) {};
+                     \node[#3] at (#1) {#4};}
+%Header footer
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{02132 Computer Systems \lb Assignment 3 \lb December \nth{1}}
+\chead{\includegraphics[width=.05\textwidth]{DTU}}
+\rhead{\authone \ \textbf{\SIDone} \lb \authtwo \ \textbf{\SIDtwo} \lb \auththree \ \textbf{\SIDthree}}
+\cfoot{Page \thepage\, of\, \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\setlength{\headheight}{36.75034pt}
+
+%Text tools
+\usepackage{listings}
+\usepackage{parcolumns}
+\usepackage[super]{nth}
+\usepackage[normalem]{ulem}
+\usepackage{import}
+\usepackage{url}
+\usepackage{lipsum}
+\usepackage{microtype}
+\usepackage[pdfencoding=auto, psdextra]{hyperref}
+\hypersetup{
+    colorlinks   = true, %Colours links instead of ugly boxes
+    urlcolor     = blue, %Colour for external hyperlinks
+    linkcolor    = blue, %Colour of internal links
+    citecolor   = red %Colour of citations
+}
+\usepackage[capitalise]{cleveref}
+% \crefname{table}{Huskeord}{Huskeord}
+\usepackage{enumitem}
+\newlist{arrowlist}{itemize}{1}
+\setlist[arrowlist]{label={\(\rightarrow\)}}
+\usepackage{tabularray}
+\UseTblrLibrary{booktabs}
+\usepackage{todonotes}
+\usepackage[square, longnamesfirst, numbers]{natbib}
+\usepackage{empheq}
+% \usepackage[newfloat, outputdir=/]{minted} % Overleaf minted buildpath fix
+\usepackage[newfloat]{minted}
+\setminted{fontsize=\small,
+           linenos=true}
+\usemintedstyle{tango}
+\SetupFloatingEnvironment{listing}{listname=Listings}
+\captionsetup[listing]{position=top, skip=-1pt}
+\newcommand{\im}[3]{\inputminted[linenos=true, python3=true, firstline=#2, lastline=#3]{python}{#1}}
+\newcommand{\java}[3]{\inputminted[linenos=true, firstline=#2, lastline=#3]{java}{#1}}
+\usepackage{dirtree}
+
+%Definitions and new commands
+\newcommand{\degr}{^{\circ}}
+\newcommand{\me}{\mathrm{e}}
+
+%Title and sectioning
+\def\Vhrulefill{\leavevmode\leaders\hrule height 0.7ex depth \dimexpr0.4pt-0.7ex\hfill\kern0pt}
+\usepackage{titlesec}
+\usepackage{titling}
+\definecolor{DTUred}{cmyk}{0, .91, .72, .23}
+\definecolor{FMNgrey}{cmyk}{.73,.43,.53,.38}
+%Use letters insted of numbers in section numbering
+% \renewcommand{\thesection}{\Alph{section}}
+% \renewcommand{\thesubsection}{\Alph{subsection}}
+
+\makeatletter
+\newcommand{\github}[1]{%
+   \href{#1}{\color{DTUred}\faGithub}%
+}
+\makeatother
+
+%Algorithms and pseudocode
+\newcounter{nalg}[section] % defines algorithm counter for chapter-level
+\renewcommand{\thenalg}{\thesection .\arabic{nalg}} %defines appearance of the algorithm counter
+\DeclareCaptionLabelFormat{algocaption}{Algoritme \thenalg} % defines a new caption label as Algorithm x.y
+
+\lstnewenvironment{algorithm}[1][] %defines the algorithm listing environment
+{
+    \refstepcounter{nalg} %increments algorithm number
+    \captionsetup{labelformat=algocaption,labelsep=colon} %defines the caption setup for: it ises label format as the declared caption label above and makes label and caption text to be separated by a ':'
+    \lstset{ %this is the stype
+        mathescape=true,
+        frame=tB,
+        numbers=left,
+        numberstyle=\tiny,
+        basicstyle=\scriptsize,
+        keywordstyle=\color{black}\bfseries\em,
+        keywords={,input, output, return, datatype, function, in, if, else, foreach, for, while, begin, end, do,} %add the keywords you want, or load a language as Rubens explains in his comment above.
+        numbers=left,
+        xleftmargin=.04\textwidth,
+        columns=fullflexible,
+        escapechar=\&,
+        #1 % this is to add specific settings to an usage of this environment (for instnce, the caption and referable label)
+    }
+}
+{}
+\newcommand*{\runtimeAnalysis}[3]{\hfill\makebox[#3em][l]{\(#1\)}\hspace{5em}\makebox[#3em][l]{\(#2\)}}%
+
+\begin{document}
+
+\titleformat{\section}[block]
+{\normalfont\Large\scshape\filright\color{DTUred}}{\fbox{\thesection}}{1em}{}
+
+\titleformat{\subsection}
+{\titlerule
+    \vspace{.8ex}%
+    \normalfont\scshape\color{FMNgrey}}
+{\thesubsection.}{.5em}{}
+
+\titleformat{\subsubsection}[wrap]
+{\normalfont\fontseries{b}\selectfont\filright}
+{\thesubsubsection.}{.5em}{}
+\titlespacing{\subsubsection}
+{12pc}{1.5ex plus .1ex minus .2ex}{1pc}
+
+\title{\vspace{-40mm}\Huge\scshape\color{DTUred} \titl\lb\vspace{-4mm}\rule{4cm}{0.5mm}\lb\Large{\subtitl}}
+\date{December \nth{1}}
+\preauthor{\begin{center}
+        \large \lineskip 0.5em%
+        \begin{tabular}[t]{r}}
+            \author{\textbf{Group: 22} \lb \lb \authone \ \textbf{\SIDone} \lb \authtwo \ \textbf{\SIDtwo} \lb \auththree \ \textbf{\SIDthree} \lb \href{https://github.com/rwiuff/02132Assignment3}{\color{DTUred}github.com/rwiuff/02132Assignment3} \github{https://github.com/rwiuff/02132Assignment3}}
+            \postauthor{\end{tabular}\par\end{center}}
+\maketitle
+
+\pagenumbering{arabic}
+
+\thispagestyle{empty}
+
+\section{Work distribution}
+\cref{tbl:ansvar} shows the work distribution for this project.
+\begin{table}[H]
+    \centering
+    \caption{Work distribution on the project}\label{tbl:ansvar}
+    \begin{tabular}{lll}
+        \toprule
+        Name                 & Development tasks & Report tasks \\
+        \midrule
+        Mikkel Arn Andersen  &                   &              \\
+        \midrule
+        Niclas Juul Schæffer &                   &              \\
+        \midrule
+        Rasmus Wiuff         &                   &              \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+\section{Design}
+\textit{Explain here what the design process was. Show the state diagram of the FSMD and explain and motivate you design decisions.}
+\section{Implementation}
+\textit{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question ``What does a reader need to know about your Chisel implementation?''}
+\section{Test And Evaluation}
+\textit{Report here the results from the test you have carried out. Present how you have tested (paper and pencil testing) the FSMD you have designed. Present the tests you have developed (if any). Remember to discuss the relusts and the test you have carried out, do not just present them, but explain and argue their meaning. Adress the design evaluation questions in Task 6 in the Assignment 3 document.}
+% \section{References}
+% \begin{thebibliography}{1}
+%     \bibitem{arduino}
+%     Arduino, José Bagur, Taddy Chung \emph{Arduino Memory Guide (19/09/2023)\newline \href{https://docs.arduino.cc/learn/programming/memory-guide}{https://docs.arduino.cc/learn/programming/memory-guide}}
+% \end{thebibliography}
+%Bibliography herunder:
+%\newpage
+
+%\bibliographystyle{unsrtnat}
+%\bibliography{Bibliography}
+
+%\newpage
+
+%\listoffigures
+% \newpage
+% \listoftables
+%\newpage
+
+%Appendicer herunder:
+
+%\input{Appendix.tex}
+
+\end{document}
