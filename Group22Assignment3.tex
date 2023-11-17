@@ -207,7 +207,7 @@ First a CFG was generated from the pseudocode in the assignment material, yieldi
         \node[roundnode]    (erode)  [right = .5 of y0]                     {\texttt{out\_image(x,y) = 0}};
         \node[roundnode]    (incY)   [right = .5 of checkY]                 {\texttt{y++}};
         \node[roundnode]    (or)     [right = .5 of erode, align = right]   {\texttt{if in\_image(x-1,y) == 0}\\\texttt{|| in\_image(x+1,y) == 0}\\\texttt{|| in\_image(x,y-1) == 0}\\\texttt{|| in\_image(x,y+1) == 0}};
-        \node[roundnode]    (skip)   at (incY -| or)                      {\texttt{out\_image(x,y) = 255}};
+        \node[roundnode]    (skip)   at (incY -| or)                        {\texttt{out\_image(x,y) = 255}};
         \draw[->] (start.east) -- (init.west);
         \draw[->] (init.south) -- (checkX.north);
         \draw[->] (checkX.west) -- (done.east);
