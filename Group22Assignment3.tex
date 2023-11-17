@@ -190,8 +190,8 @@ First a CFG was generated from the pseudocode in the assignment material, yieldi
     \centering
     \caption{Control flow graph of erosion algorithm}\label{fig:cfg}
     \begin{tikzpicture}[
-            roundnode/.style={rectangle, rounded corners=3mm, draw=green!60, fill=green!5, very thick, minimum size=8mm},
-            squarednode/.style={rectangle, rounded corners=3mm, draw=red!60, fill=red!5, very thick, minimum size=8mm},
+            roundnode/.style={rectangle, rounded corners=3mm, draw=black, fill={rgb:black,1;white,10}, very thick, minimum size=8mm},
+            squarednode/.style={rectangle, rounded corners=3mm, draw=black!60, fill={rgb:black,1;white,10}, very thick, minimum size=8mm},
         ]
         \node[squarednode]  (start)                                         {\texttt{Start}};
         \node[roundnode]    (init)   [right = .5 of start, align = center]  {\texttt{x = 0}\\\texttt{y = 0}};
