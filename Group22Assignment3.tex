@@ -65,7 +65,7 @@ separate-uncertainty-units = single ,
 % \tikzexternalize[prefix=tikz/]
 \usepackage{circuitikz}
 \ctikzset{logic ports = ieee}
-\usetikzlibrary{positioning}
+\usetikzlibrary{positioning,arrows,automata}
 \newcommand{\pin}[3]{\node[blue, font = \small, #2] at (#1) {#3};
                      \coordinate (#3) at (#1);}
 \newcommand{\port}[4]{\node[circ, #2] (#1) {};
@@ -107,16 +107,16 @@ separate-uncertainty-units = single ,
 \usepackage{todonotes}
 \usepackage[square, longnamesfirst, numbers]{natbib}
 \usepackage{empheq}
-% \usepackage[newfloat, outputdir=/]{minted} % Overleaf minted buildpath fix
-\usepackage[newfloat]{minted}
-\setminted{fontsize=\small,
-           linenos=true}
-\usemintedstyle{tango}
-\SetupFloatingEnvironment{listing}{listname=Listings}
-\captionsetup[listing]{position=top, skip=-1pt}
-\newcommand{\im}[3]{\inputminted[linenos=true, python3=true, firstline=#2, lastline=#3]{python}{#1}}
-\newcommand{\java}[3]{\inputminted[linenos=true, firstline=#2, lastline=#3]{java}{#1}}
-\usepackage{dirtree}
+% % \usepackage[newfloat, outputdir=/]{minted} % Overleaf minted buildpath fix
+% \usepackage[newfloat]{minted}
+% \setminted{fontsize=\small,
+%            linenos=true}
+% \usemintedstyle{tango}
+% \SetupFloatingEnvironment{listing}{listname=Listings}
+% \captionsetup[listing]{position=top, skip=-1pt}
+% \newcommand{\im}[3]{\inputminted[linenos=true, python3=true, firstline=#2, lastline=#3]{python}{#1}}
+% \newcommand{\java}[3]{\inputminted[linenos=true, firstline=#2, lastline=#3]{java}{#1}}
+% \usepackage{dirtree}
 
 %Definitions and new commands
 \newcommand{\degr}{^{\circ}}
@@ -137,33 +137,6 @@ separate-uncertainty-units = single ,
    \href{#1}{\color{DTUred}\faGithub}%
 }
 \makeatother
-
-%Algorithms and pseudocode
-\newcounter{nalg}[section] % defines algorithm counter for chapter-level
-\renewcommand{\thenalg}{\thesection .\arabic{nalg}} %defines appearance of the algorithm counter
-\DeclareCaptionLabelFormat{algocaption}{Algoritme \thenalg} % defines a new caption label as Algorithm x.y
-
-\lstnewenvironment{algorithm}[1][] %defines the algorithm listing environment
-{
-    \refstepcounter{nalg} %increments algorithm number
-    \captionsetup{labelformat=algocaption,labelsep=colon} %defines the caption setup for: it ises label format as the declared caption label above and makes label and caption text to be separated by a ':'
-    \lstset{ %this is the stype
-        mathescape=true,
-        frame=tB,
-        numbers=left,
-        numberstyle=\tiny,
-        basicstyle=\scriptsize,
-        keywordstyle=\color{black}\bfseries\em,
-        keywords={,input, output, return, datatype, function, in, if, else, foreach, for, while, begin, end, do,} %add the keywords you want, or load a language as Rubens explains in his comment above.
-        numbers=left,
-        xleftmargin=.04\textwidth,
-        columns=fullflexible,
-        escapechar=\&,
-        #1 % this is to add specific settings to an usage of this environment (for instnce, the caption and referable label)
-    }
-}
-{}
-\newcommand*{\runtimeAnalysis}[3]{\hfill\makebox[#3em][l]{\(#1\)}\hspace{5em}\makebox[#3em][l]{\(#2\)}}%
 
 \begin{document}
 
@@ -211,7 +184,68 @@ separate-uncertainty-units = single ,
     \end{tabular}
 \end{table}
 \section{Design}
-\textit{Explain here what the design process was. Show the state diagram of the FSMD and explain and motivate you design decisions.}
+% \textit{Explain here what the design process was. Show the state diagram of the FSMD and explain and motivate you design decisions.}
+First a CFG was generated from the pseudocode in the assignment material, yielding the graph in \cref{fig:cfg}.
+\begin{figure}[H]
+    \centering
+    \caption{Control flow graph of erosion algorithm}\label{fig:cfg}
+    \begin{tikzpicture}[
+            roundnode/.style={rectangle, rounded corners=3mm, draw=green!60, fill=green!5, very thick, minimum size=8mm},
+            squarednode/.style={rectangle, rounded corners=3mm, draw=red!60, fill=red!5, very thick, minimum size=8mm},
+        ]
+        \node[squarednode]  (start)                                         {\texttt{Start}};
+        \node[roundnode]    (init)   [right = .5 of start, align = center]  {\texttt{x = 0}\\\texttt{y = 0}};
+        \node[roundnode]    (checkX) [below = .5 of init]                   {\texttt{x < 19}};
+        \node[squarednode]  (done)   [left = .5 of checkX]                  {\texttt{Done}};
+        \node[roundnode]    (incX)   [below = .5 of checkX, align = center] {\texttt{y = 0}\\\texttt{x++}};
+        \node[roundnode]    (checkY) [right = .5 of incX]                   {\texttt{y < 19}};
+        \node[roundnode]    (x0)     [below = .5 of checkY]                 {\texttt{if x == 0}};
+        \node[roundnode]    (x19)    [below = .5 of x0]                     {\texttt{if x == 19}};
+        \node[roundnode]    (y0)     [below = .5 of x19]                    {\texttt{if y == 0}};
+        \node[roundnode]    (y19)    [below = .5 of y0]                     {\texttt{if y == 19}};
+        \node[roundnode]    (inner)  [below = .5 of y19]                    {\texttt{if in\_image(x,y) == 0}};
+        \node[roundnode]    (erode)  [right = .5 of y0]                     {\texttt{out\_image(x,y) = 0}};
+        \node[roundnode]    (incY)   [right = .5 of checkY]                 {\texttt{y++}};
+        \node[roundnode]    (or)     [right = .5 of erode, align = right]   {\texttt{if in\_image(x-1,y) == 0}\\\texttt{|| in\_image(x+1,y) == 0}\\\texttt{|| in\_image(x,y-1) == 0}\\\texttt{|| in\_image(x,y+1) == 0}};
+        \node[roundnode]    (skip)   at (incY -| or)                      {\texttt{out\_image(x,y) = 255}};
+        \draw[->] (start.east) -- (init.west);
+        \draw[->] (init.south) -- (checkX.north);
+        \draw[->] (checkX.west) -- (done.east);
+        \draw[->] (checkX.east) -| (checkY.north);
+        \draw[->] (checkY.west) -- (incX.east);
+        \draw[->] (incX.north) -- (checkX.south);
+        \draw[->] (checkY.south) -- (x0.north);
+        \draw[->] (x0.south) -- (x19.north);
+        \draw[->] (x19.south) -- (y0.north);
+        \draw[->] (y0.south) -- (y19.north);
+        \draw[->] (y19.south) -- (inner.north);
+        \draw[->] (inner.south) -- ++(0,-.5) -| (or.south);
+        \draw[->] (x0.east) -| (erode.north);
+        \draw[->] (x19.east) -- (erode.north west);
+        \draw[->] (y0.east) -- (erode.west);
+        \draw[->] (y19.east) -- (erode.south west);
+        \draw[->] (inner.east) -| (erode.south);
+        \draw[->] (or.west) -- (erode.east);
+        \draw[->] (or.north) -- (skip.south);
+        \draw[->] (erode.north east) ++(-1,0) -- ++(0,3) -| (incY.south);
+        \draw[->] (skip.west) -- (incY.east);
+        \draw[->] (incY.west) -- (checkY);
+    \end{tikzpicture}
+\end{figure}
+This gives a good idea of the needed states in the FSMD. On the getgo two obvious optimisations can be done here. The y incrementor is constant with both writing operations, and can be split into these. We also see that the bordercases could be replaced by a single state using a more complex logical ciruit. The inner pixel check can also be merged into this state as it is still on the same control path and leads to the zerorising of the output pixel or the check for neighbouring pixels.\newline
+\cref{fig:fsmd} shows the state diagram.
+\begin{figure}[H]
+    \centering
+    \caption{State diagram of the erosion accelerator FSMD}\label{fig:fsmd}
+    \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+        \tikzstyle{every state}=[fill={rgb:black,1;white,10}]
+        \node[state, initial, accepting] (idle)                   {idle};
+        \node[state]                     (init) [right = 3 of idle] {init var};
+        \path[->]
+        (idle) edge [loop above] node {start == 0} ( )
+        (idle) edge              node {start == 1} (init);
+    \end{tikzpicture}
+\end{figure}
 \section{Implementation}
 \textit{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question ``What does a reader need to know about your Chisel implementation?''}
 \section{Test And Evaluation}
