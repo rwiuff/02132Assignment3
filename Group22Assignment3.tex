@@ -237,15 +237,63 @@ This gives a good idea of the needed states in the FSMD. On the getgo two obviou
 \begin{figure}[H]
     \centering
     \caption{State diagram of the erosion accelerator FSMD}\label{fig:fsmd}
+    \resizebox{\textwidth}{!}{%
     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
         \tikzstyle{every state}=[fill={rgb:black,1;white,10}]
-        \node[state, initial, accepting] (idle)                   {idle};
-        \node[state]                     (init) [right = 3 of idle] {init var};
+        \node[state, initial, accepting] (idle)                         {idle};
+        \node[state, align=left]         (border) [right = 4 of idle]   {border\\Erosion};
+        % \node[state]                     (init)   [below = 4 of idle]   {regInit};
+        % \node[state]                     (cond)   [below = 2 of init]   {conditional};
+
         \path[->]
-        (idle) edge [loop above] node {start == 0} ( )
-        (idle) edge              node {start == 1} (init);
+        (idle)   edge [loop above] node {\textbf{start == 0}}           ( )
+        (idle)   edge              node {\textbf{start == 1}}           (border);
     \end{tikzpicture}
+    }%
 \end{figure}
+A list of registers are used to reduce read/write operations to/from the memory. The idea is to store three rows at a time, as to satisfy the erosion mask. On every iteration only one row is loaded into the register. The Register scheme is seen in \cref{fig:regs}.
+\begin{figure}[H]
+    \centering
+    \caption{The registers containing the image rows}\label{fig:regs}
+    \resizebox{.7\textwidth}{!}{%
+    \begin{tikzpicture}
+        \draw[black, very thick]   (0,0)    rectangle (3,3);
+        \draw[step=1.0,black,thin] (0,0)    grid      (3,3);
+        \draw[black, very thick]   (4,0)    rectangle (6,3);
+        \draw[step=1.0,black,thin] (4,0)    grid      (6,3);
+
+        \draw[black, very thick]   (6.5,2)  rectangle (7.5,3);
+        \draw[black, very thick]   (6.5,.5) rectangle (7.5,1.5);
+        \draw[black, very thick]   (8,2)    rectangle (10,3);
+
+        \node (x)     at (7,2.5)   {xReg};
+        \node (y)     at (7,1)     {yReg};
+        \node (reg)   at (9,2.5)   {addressReg};
+
+        \node (R0)    at (.5,2.5)  {R0};
+        \node (R1)    at (1.5,2.5) {R1};
+        \node (R2)    at (2.5,2.5) {R2};
+        \node (dots1) at (3.5,2.5) {\(\cdots\)};
+        \node (R18)   at (4.5,2.5) {R18};
+        \node (R19)   at (5.5,2.5) {R19};
+
+        \node (R20)   at (.5,1.5)  {R20};
+        \node (R21)   at (1.5,1.5) {R21};
+        \node (R22)   at (2.5,1.5) {R22};
+        \node (dots2) at (3.5,1.5) {\(\cdots\)};
+        \node (R38)   at (4.5,1.5) {R38};
+        \node (R39)   at (5.5,1.5) {R39};
+
+        \node (R40)   at (.5,.5)   {R40};
+        \node (R41)   at (1.5,.5)  {R41};
+        \node (R42)   at (2.5,.5)  {R42};
+        \node (dots3) at (3.5,.5)  {\(\cdots\)};
+        \node (R58)   at (4.5,.5)  {R58};
+        \node (R59)   at (5.5,.5)  {R59};
+    \end{tikzpicture}
+    }%
+\end{figure}
+Furthermore registers are needed to store the memory address, the x and the y counters
 \section{Implementation}
 \textit{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question ``What does a reader need to know about your Chisel implementation?''}
 \section{Test And Evaluation}
