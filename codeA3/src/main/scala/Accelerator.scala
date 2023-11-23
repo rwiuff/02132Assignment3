@@ -10,11 +10,12 @@ class Accelerator extends Module {
     val dataRead = Input(UInt(32.W))
     val writeEnable = Output(Bool())
     val dataWrite = Output(UInt(32.W))
-
+    val xMax = Input(UInt(16.W))
+    val yMax = Input(UInt(16.W))
   })
 
   // State enum and register
-  val idle :: initialise :: xCond :: yCond :: xInc :: borderPix :: setZero :: innerPixel :: done :: Nil =
+  val idle :: black :: initialise :: xCond :: yCond :: xInc :: borderPix :: setZero :: innerPixel :: done :: Nil =
     Enum(9)
   val stateReg = RegInit(idle)
 
@@ -30,13 +31,44 @@ class Accelerator extends Module {
   io.dataWrite := false.B
   io.done := false.B
 
+
+
   switch(stateReg) {
     is(idle) {
       when(io.start) {
-        stateReg := initialise
+        stateReg := black
         addressReg := 0.U(16.W)
       }
     }
+
+    //function here to add black border
+    is(black){
+      when(xReg == 0){
+        io.address = xReg + yReg * 20
+        io.writeEnable = true.B
+        io.dataWrite = 0.U(32.W)
+        stateReg := black
+      } .otherwise (xReg == 19){
+        io.address = xReg + yReg * 20
+        io.writeEnable = true.B
+        io.dataWrite = 0.U(32.W)
+        stateReg := black
+    }
+     when(yReg == 0){
+      io.address = yReg + xReg*20
+      io.writeEnable = true.B
+      io.dataWrite = 0.U(32.W)
+      stateReg := black
+     }.otherwise (yReg == 19){
+      io.address = yReg + xReg*20
+      io.writeEnable = true.B
+      io.dataWrite = 0.U(32.W)
+      stateReg := black
+     }
+
+      stateReg := initialise
+    }
+
 
     is(initialise) {
       when(xReg === 59.U(32.W)) {
@@ -93,11 +125,11 @@ class Accelerator extends Module {
       stateReg := yCond
     }
 
-    is(innerPixel){
+    /* is(innerPixel){
       when(dataReg(xReg + 20.U(32.W)) === 0){
         
-      }
-    }
+      } 
+    }*/
 
     // is(read) {
     //   dataMemory.io.address := addressReg
