@@ -13,6 +13,7 @@ class Accelerator extends Module {
   })
 
   // State enum and register
+  //     0 ::       1 ::     2 ::    3 ::         4 ::          5 ::     6 ::
   val idle :: regInit :: count :: done :: regUpdate :: checkPixel :: write :: Nil =
     Enum(7)
   val stateReg = RegInit(idle)
