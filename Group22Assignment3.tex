@@ -240,14 +240,36 @@ This gives a good idea of the needed states in the FSMD. On the getgo two obviou
     \resizebox{\textwidth}{!}{%
     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
         \tikzstyle{every state}=[fill={rgb:black,1;white,10}]
-        \node[state, initial, accepting] (idle)                         {idle};
-        \node[state, align=left]         (border) [right = 4 of idle]   {border\\Erosion};
-        % \node[state]                     (init)   [below = 4 of idle]   {regInit};
-        % \node[state]                     (cond)   [below = 2 of init]   {conditional};
+        \node[state, initial, accepting] (idle)                           {idle};
+        \node[state]                     (reginit) [right = 5 of idle]    {regInit};
+        \node[state]                     (count)   [below = 3 of reginit] {count};
+        \node[state, align=left]         (regup)   [left = 6 of count]    {reg\\Update};
+        \node[state]                     (done)    [right = 4 of count]   {done};
+        \node[state, align=left]         (check)   [below = 4 of done]    {check\\Pixel};
+        \node[state]                     (write)   [below = 5 of count]   {write};
 
         \path[->]
-        (idle)   edge [loop above] node {\textbf{start == 0}}           ( )
-        (idle)   edge              node {\textbf{start == 1}}           (border);
+        (idle)    edge [loop above] node                           {\textbf{start == 0} / \_}          ( )
+        (done)    edge [loop above] node                           {\textbf{True} / done = 1}          ( )
+        (idle)    edge              node                           {\textbf{start == 1} / varReg = 20} (reginit)
+        (reginit) edge [loop right] node                           {\textbf{varReg < 60} / varReg++}   ( )
+        (reginit) edge              node[right, align=right]       {\textbf{varReg == 60}}             (count)
+        (count)   edge [bend right] node[above]                    {\textbf{xReg == 20}}               (regup)
+        (regup)   edge [bend right] node[below, align=right]       {\textbf{varReg == 60} / yReg++ \\
+                                                                    xReg = 0}                          (count)
+        (regup)   edge [loop above] node                           {\textbf{varReg < 60} / varReg++}   ( )
+        (count)   edge [bend left]  node[right, align=right]       {\textbf{xReg < 20} / addressReg = \\
+                                                                    \(x + 20 \times y + 400\)}         (check)
+        (count)   edge [bend right] node[below left, align=right]  {\textbf{xReg == 0 || xReg == 19}\\
+                                                                    \textbf{|| yReg == 0 || yReg == 19}\\
+                                                                    / addressReg=\\
+                                                                    \(x + 20 \times y + 400\)
+                                                                    \\dataWrite = 0}                   (write)
+        (check)   edge [bend left]  node[below, align=right]       {\textbf{False} / dataWrite = 255}  (write)
+        (check)   edge [bend right] node[above, align=right]       {\textbf{True} / dataWrite = 0}     (write)
+        (write)   edge              node[right]                    {xReg++}                            (count)
+        (count)   edge              node                           {\textbf{yReg == 20}}               (done)
+        ;
     \end{tikzpicture}
     }%
 \end{figure}
@@ -265,10 +287,12 @@ A list of registers are used to reduce read/write operations to/from the memory.
         \draw[black, very thick]   (6.5,2)  rectangle (7.5,3);
         \draw[black, very thick]   (6.5,.5) rectangle (7.5,1.5);
         \draw[black, very thick]   (8,2)    rectangle (10,3);
+        \draw[black, very thick]   (8,.5)   rectangle (10,1.5);
 
         \node (x)     at (7,2.5)   {xReg};
         \node (y)     at (7,1)     {yReg};
         \node (reg)   at (9,2.5)   {addressReg};
+        \node (inc)   at (9,1)     {varReg};
 
         \node (R0)    at (.5,2.5)  {R0};
         \node (R1)    at (1.5,2.5) {R1};
