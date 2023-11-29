@@ -75,10 +75,8 @@ class Accelerator extends Module {
       when(varReg < 40.U) {
         dataReg(varReg) := dataReg(varReg + 20.U)
         varReg := varReg + 1.U
-        addressReg := varReg + 1.U + 20.U * (yReg)
-        io.address := addressReg
         stateReg := regUpdate
-      }.elsewhen(varReg <= 60.U) {
+      }.elsewhen(varReg < 60.U) {
         addressReg := varReg + 1.U + 20.U * (yReg)
         io.address := addressReg
         dataReg(varReg) := io.dataRead
