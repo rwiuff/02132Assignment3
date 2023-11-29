@@ -240,35 +240,67 @@ This gives a good idea of the needed states in the FSMD. On the getgo two obviou
     \resizebox{\textwidth}{!}{%
         \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
             \tikzstyle{every state}=[fill={rgb:black,1;white,10}]
+
+            \draw[black, thick] (11.5,-1.1) rectangle (14,3);
+            \node[below] at (12.75,3)  {\small\itshape\bfseries Default values};
+            \node[right] at (11.5,2.4) {\small adressReg = 0};
+            \node[right] at (11.5,2)   {\small dataReg = 0};
+            \node[right] at (11.5,1.6) {\small xreg = 0};
+            \node[right] at (11.5,1.2) {\small yreg = 0};
+            \node[right] at (11.5,.8)  {\small varReg = 0};
+            \node[right] at (11.5,.4)  {\small writeEnable = 0};
+            \node[right] at (11.5,0)   {\small address = 0};
+            \node[right] at (11.5,-.4) {\small dataWrite = 0};
+            \node[right] at (11.5,-.8) {\small done = 0};
+
             \node[state, initial, accepting] (idle)                           {idle};
             \node[state]                     (reginit) [right = 5 of idle]    {regInit};
-            \node[state]                     (count)   [below = 3 of reginit] {count};
-            \node[state, align=left]         (regup)   [left = 6 of count]    {reg\\Update};
-            \node[state]                     (done)    [right = 4 of count]   {done};
-            \node[state, align=left]         (check)   [below = 4 of done]    {check\\Pixel};
-            \node[state]                     (write)   [below = 5 of count]   {write};
+            \node[state]                     (count)   [below = 4 of reginit] {count};
+            \node[state, align=left]         (regup)   [left = 5 of count]    {reg\\Update};
+            \node[state]                     (done)    [right = 2 of reginit] {done};
+            \node[state, align=left]         (check)   [below right = 10 of count]   {check\\Pixel};
+            \node[state]                     (write)   [below left = 10 of count]   {write};
 
             \path[->]
-            (idle)    edge [loop above] node                           {\textbf{start == 0} / \_}          ( )
-            (done)    edge [loop above] node                           {\textbf{True} / done = 1}          ( )
-            (idle)    edge              node                           {\textbf{start == 1} / varReg = 20} (reginit)
-            (reginit) edge [loop right] node                           {\textbf{varReg < 60} / varReg++}   ( )
-            (reginit) edge              node[right, align=right]       {\textbf{varReg == 60}}             (count)
-            (count)   edge [bend right] node[above]                    {\textbf{xReg == 20}}               (regup)
-            (regup)   edge [bend right] node[below, align=right]       {\textbf{varReg == 60} / yReg++ \\
-                    xReg = 0}                          (count)
-            (regup)   edge [loop above] node                           {\textbf{varReg < 60} / varReg++}   ( )
-            (count)   edge [bend left]  node[right, align=right]       {\textbf{xReg < 20} / addressReg = \\
-                    \(x + 20 \times y + 400\)}         (check)
-            (count)   edge [bend right] node[below left, align=right]  {\textbf{xReg == 0 || xReg == 19}\\
-                    \textbf{|| yReg == 0 || yReg == 19}\\
-                    / addressReg=\\
-                    \(x + 20 \times y + 400\)
-                    \\dataWrite = 0}                   (write)
-            (check)   edge [bend left]  node[below, align=right]       {\textbf{False} / dataWrite = 255}  (write)
-            (check)   edge [bend right] node[above, align=right]       {\textbf{True} / dataWrite = 0}     (write)
-            (write)   edge              node[right]                    {xReg++}                            (count)
-            (count)   edge              node                           {\textbf{yReg == 20}}               (done)
+            (idle)    edge [loop above] node                          {\textbf{start == 0} / \_}                ( )
+            (done)    edge [loop right] node                          {\textbf{True} / done = 1;}               ( )
+            (idle)    edge              node                          {\textbf{start == 1} / varReg = 20;}      (reginit)
+            (reginit) edge [loop above] node[align=right]             {\textbf{varReg < 60} / adress = varReg;
+                                                                       \\dataReg(varReg) = dataRead;
+                                                                       \\varReg++;}                             ( )
+            (reginit) edge              node[above left, align=right] {\textbf{varReg == 60}}                   (count)
+            (count)   edge [bend right] node[above]                   {\textbf{xReg == 20} / varReg = 0;}       (regup)
+            (regup)   edge [bend right] node[below, align=right]      {\textbf{varReg == 60} / yReg++;
+                                                                       \\xReg = 0;}                             (count)
+            (regup)   edge [loop above] node[align=right]             {\textbf{varReg < 40} / dataReg(varReg) =
+                                                                       \\dataReg(varReg + 20);
+                                                                       \\varReg++;}                             ( )
+            (regup)   edge [loop left]  node[align=right]             {\textbf{varReg < 60} / addressReg =
+                                                                       \\varReg + \(1 + 20 \ \times\) yReg;
+                                                                       \\address = addressReg;
+                                                                       \\dataReg(varReg) = dataRead;
+                                                                       \\varReg++;}                             ( )
+            (count)   edge              node[align=right]             {\textbf{xReg < 20} / addressReg =
+                                                                       \\\(x + 20 \times y + 400\);}            (check)
+            (count)   edge [bend right] node[below left, align=right] {\textbf{xReg == 0 || xReg == 19}
+                                                                       \\\textbf{|| yReg == 0 || yReg == 19}/
+                                                                       \\addressReg =
+                                                                       \\\(x + 20 \times y + 400\);
+                                                                       \\dataWrite = 0;}                        (write)
+            (check)   edge [bend left]  node[align=right]             {\textbf{dataReg(varReg) ||}
+                                                                       \\\textbf{dataReg(varReg - 20) ||}
+                                                                       \\\textbf{dataReg(varReg - 1) ||}
+                                                                       \\\textbf{dataReg(varReg + 1) ||}
+                                                                       \\\textbf{dataReg(varReg + 20) != 0} /
+                                                                       \\varReg = 255;}                         (write)
+            (check)   edge              node[above, align=right]      {\textbf{dataReg(varReg) ||}
+                                                                       \\\textbf{dataReg(varReg - 20) ||}
+                                                                       \\\textbf{dataReg(varReg - 1) ||}
+                                                                       \\\textbf{dataReg(varReg + 1) ||}
+                                                                       \\\textbf{dataReg(varReg + 20) == 0} /
+                                                                       \\varReg = 0;}                           (write)
+            (write)   edge[bend right]  node[right]                   {xReg++;}                                 (count)
+            (count)   edge              node[right]                   {\textbf{yReg == 20}}                     (done)
             ;
         \end{tikzpicture}
     }%

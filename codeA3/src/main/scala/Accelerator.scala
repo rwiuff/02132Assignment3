@@ -90,14 +90,12 @@ class Accelerator extends Module {
     }
 
     is(checkPixel) {
-      when(dataReg(varReg) === 0.U) {
-        varReg := 0.U
-        stateReg := write
-      }.elsewhen(
+      when(
+        dataReg(varReg) === 0.U ||
         dataReg(varReg - 20.U) === 0.U ||
-          dataReg(varReg - 1.U) === 0.U ||
-          dataReg(varReg + 1.U) === 0.U ||
-          dataReg(varReg + 20.U) === 0.U
+        dataReg(varReg - 1.U) === 0.U ||
+        dataReg(varReg + 1.U) === 0.U ||
+        dataReg(varReg + 20.U) === 0.U
       ) {
         varReg := 0.U
         stateReg := write

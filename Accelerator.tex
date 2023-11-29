@@ -1,0 +1,23 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{float}
+\usepackage[a4paper, centering, rmargin=2.5cm, tmargin=1.5cm, lmargin=2.5cm, bmargin=1.5cm]{geometry}
+\usepackage{listings}
+\usepackage{microtype}
+\usepackage[newfloat]{minted}
+\setminted{fontsize=\small,
+           linenos=true}
+\usemintedstyle{tango}
+\SetupFloatingEnvironment{listing}{listname=Listings}
+% \captionsetup[listing]{position=top, skip=-1pt}
+\newcommand{\im}[3]{\inputminted[linenos=true, python3=true, firstline=#2, lastline=#3]{python}{#1}}
+\newcommand{\java}[3]{\inputminted[linenos=true, firstline=#2, lastline=#3]{java}{#1}}
+\begin{document}
+\begin{listing}
+    \inputminted[linenos=true, lastline=62]{scala}{codeA3/src/main/scala/Accelerator.scala}    
+\end{listing}\newpage
+\begin{listing}
+    \inputminted[linenos=true, firstline=63]{scala}{codeA3/src/main/scala/Accelerator.scala}    
+\end{listing}
+\end{document}
