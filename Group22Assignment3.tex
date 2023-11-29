@@ -402,6 +402,16 @@ Furthermore registers are needed to store the memory address, the x and the y co
 \end{figure}
 \section{Implementation}
 \textit{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question ``What does a reader need to know about your Chisel implementation?''}
+\\
+We implemented a feature where we could control the states with a Enum called stateReg which we make starts on idle. \\
+The way we use it its that all our functions is some when loops, that checks if the state is certain state, if so then run the specific function corresponds to that state. when everything have been ran, then the state becomes done. 
+\begin{center}
+    \includegraphics[]{Pictures/StateEnum.png}
+\end{center}
+
+
+
+
 \section{Test And Evaluation}
 \textit{Report here the results from the test you have carried out. Present how you have tested (paper and pencil testing) the FSMD you have designed. Present the tests you have developed (if any). Remember to discuss the relusts and the test you have carried out, do not just present them, but explain and argue their meaning. Adress the design evaluation questions in Task 6 in the Assignment 3 document.}
 % \section{References}
