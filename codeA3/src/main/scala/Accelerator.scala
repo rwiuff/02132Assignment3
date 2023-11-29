@@ -56,6 +56,7 @@ class Accelerator extends Module {
       when(yReg === 20.U) {
         stateReg := done
       }.elsewhen(xReg === 20.U) {
+        varReg := 0.U
         stateReg := regUpdate
       }.elsewhen(
         xReg === 0.U || xReg === 19.U || yReg === 0.U || yReg === 19.U
@@ -65,22 +66,25 @@ class Accelerator extends Module {
         stateReg := write
       }.elsewhen(xReg < 20.U) {
         addressReg := xReg + 20.U * yReg + 400.U
+        varReg := xReg + 20.U
         stateReg := checkPixel
       }
     }
 
     is(regUpdate) {
-      varReg := 0.U
       when(varReg < 40.U) {
         dataReg(varReg) := dataReg(varReg + 20.U)
         varReg := varReg + 1.U
+        addressReg := varReg + 1.U + 20.U * (yReg)
+        io.address := addressReg
         stateReg := regUpdate
-      }.elsewhen(varReg < 60.U) {
-        addressReg := varReg + 20.U * (yReg + 1.U)
+      }.elsewhen(varReg <= 60.U) {
+        addressReg := varReg + 1.U + 20.U * (yReg)
         io.address := addressReg
         dataReg(varReg) := io.dataRead
         varReg := varReg + 1.U
-      }.elsewhen(varReg === 60.U) {
+        stateReg := regUpdate
+      }.otherwise {
         yReg := yReg + 1.U
         xReg := 0.U
         stateReg := count
@@ -88,13 +92,14 @@ class Accelerator extends Module {
     }
 
     is(checkPixel) {
-      when(dataReg(xReg + 20.U) === 0.U) {
+      when(dataReg(varReg) === 0.U) {
         varReg := 0.U
         stateReg := write
       }.elsewhen(
-        dataReg(xReg) === 0.U || dataReg(xReg + 19.U) === 0.U || dataReg(
-          xReg + 21.U
-        ) === 0.U || dataReg(xReg + 40.U) === 0.U
+        dataReg(varReg - 20.U) === 0.U ||
+          dataReg(varReg - 1.U) === 0.U ||
+          dataReg(varReg + 1.U) === 0.U ||
+          dataReg(varReg + 20.U) === 0.U
       ) {
         varReg := 0.U
         stateReg := write
@@ -109,6 +114,8 @@ class Accelerator extends Module {
       io.address := addressReg
       io.dataWrite := varReg
       xReg := xReg + 1.U
+      addressReg := 0.U
+      varReg := 0.U
       stateReg := count
     }
 
