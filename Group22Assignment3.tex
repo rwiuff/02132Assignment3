@@ -19,21 +19,21 @@
 \usepackage{physics}
 \usepackage{mathtools}
 \numberwithin{equation}{section}
-\usepackage{siunitx}
-\sisetup{
-per-mode = power ,
-round-mode = figures ,
-round-precision = 3 ,
-exponent-mode = input ,
-output-decimal-marker = {.} ,
-exponent-product = 	imes ,
-uncertainty-mode = separate ,
-range-phrase = - ,
-range-units =  single ,
-inter-unit-product = \ensuremath{{\cdot{}}} ,
-quantity-product = \ ,
-separate-uncertainty-units = single ,
-}
+% \usepackage{siunitx}
+% \sisetup{
+% per-mode = power ,
+% round-mode = figures ,
+% round-precision = 3 ,
+% exponent-mode = input ,
+% output-decimal-marker = {.} ,
+% exponent-product = 	imes ,
+% uncertainty-mode = separate ,
+% range-phrase = - ,
+% range-units =  single ,
+% inter-unit-product = \ensuremath{{\cdot{}}} ,
+% quantity-product = \ ,
+% separate-uncertainty-units = single ,
+% }
 
 %Appendix, TOC and Bibliography
 \usepackage{appendix}
@@ -107,13 +107,13 @@ separate-uncertainty-units = single ,
 \usepackage{todonotes}
 \usepackage[square, longnamesfirst, numbers]{natbib}
 \usepackage{empheq}
-% % \usepackage[newfloat, outputdir=/]{minted} % Overleaf minted buildpath fix
-% \usepackage[newfloat]{minted}
-% \setminted{fontsize=\small,
-%            linenos=true}
-% \usemintedstyle{tango}
-% \SetupFloatingEnvironment{listing}{listname=Listings}
-% \captionsetup[listing]{position=top, skip=-1pt}
+% \usepackage[newfloat, outputdir=/]{minted} % Overleaf minted buildpath fix
+\usepackage[newfloat]{minted}
+\setminted{fontsize=\small,
+           linenos=true}
+\usemintedstyle{tango}
+\SetupFloatingEnvironment{listing}{listname=Listings}
+\captionsetup[listing]{position=top, skip=-1pt}
 % \newcommand{\im}[3]{\inputminted[linenos=true, python3=true, firstline=#2, lastline=#3]{python}{#1}}
 % \newcommand{\java}[3]{\inputminted[linenos=true, firstline=#2, lastline=#3]{java}{#1}}
 % \usepackage{dirtree}
@@ -189,124 +189,62 @@ First a CFG was generated from the pseudocode in the assignment material, yieldi
 \begin{figure}[H]
     \centering
     \caption{Control flow graph of erosion algorithm}\label{fig:cfg}
-    \begin{tikzpicture}[
-            roundnode/.style={rectangle, rounded corners=3mm, draw=black, fill={rgb:black,1;white,10}, very thick, minimum size=8mm},
-            squarednode/.style={rectangle, rounded corners=3mm, draw=black!60, fill={rgb:black,1;white,10}, very thick, minimum size=8mm},
-        ]
-        \node[squarednode]  (start)                                         {\texttt{Start}};
-        \node[roundnode]    (init)   [right = .5 of start, align = center]  {\texttt{x = 0}\\\texttt{y = 0}};
-        \node[roundnode]    (checkX) [below = .5 of init]                   {\texttt{x < 19}};
-        \node[squarednode]  (done)   [left = .5 of checkX]                  {\texttt{Done}};
-        \node[roundnode]    (incX)   [below = .5 of checkX, align = center] {\texttt{y = 0}\\\texttt{x++}};
-        \node[roundnode]    (checkY) [right = .5 of incX]                   {\texttt{y < 19}};
-        \node[roundnode]    (x0)     [below = .5 of checkY]                 {\texttt{if x == 0}};
-        \node[roundnode]    (x19)    [below = .5 of x0]                     {\texttt{if x == 19}};
-        \node[roundnode]    (y0)     [below = .5 of x19]                    {\texttt{if y == 0}};
-        \node[roundnode]    (y19)    [below = .5 of y0]                     {\texttt{if y == 19}};
-        \node[roundnode]    (inner)  [below = .5 of y19]                    {\texttt{if in\_image(x,y) == 0}};
-        \node[roundnode]    (erode)  [right = .5 of y0]                     {\texttt{out\_image(x,y) = 0}};
-        \node[roundnode]    (incY)   [right = .5 of checkY]                 {\texttt{y++}};
-        \node[roundnode]    (or)     [right = .5 of erode, align = right]   {\texttt{if in\_image(x-1,y) == 0}\\\texttt{|| in\_image(x+1,y) == 0}\\\texttt{|| in\_image(x,y-1) == 0}\\\texttt{|| in\_image(x,y+1) == 0}};
-        \node[roundnode]    (skip)   at (incY -| or)                        {\texttt{out\_image(x,y) = 255}};
-        \draw[->] (start.east) -- (init.west);
-        \draw[->] (init.south) -- (checkX.north);
-        \draw[->] (checkX.west) -- (done.east);
-        \draw[->] (checkX.east) -| (checkY.north);
-        \draw[->] (checkY.west) -- (incX.east);
-        \draw[->] (incX.north) -- (checkX.south);
-        \draw[->] (checkY.south) -- (x0.north);
-        \draw[->] (x0.south) -- (x19.north);
-        \draw[->] (x19.south) -- (y0.north);
-        \draw[->] (y0.south) -- (y19.north);
-        \draw[->] (y19.south) -- (inner.north);
-        \draw[->] (inner.south) -- ++(0,-.5) -| (or.south);
-        \draw[->] (x0.east) -| (erode.north);
-        \draw[->] (x19.east) -- (erode.north west);
-        \draw[->] (y0.east) -- (erode.west);
-        \draw[->] (y19.east) -- (erode.south west);
-        \draw[->] (inner.east) -| (erode.south);
-        \draw[->] (or.west) -- (erode.east);
-        \draw[->] (or.north) -- (skip.south);
-        \draw[->] (erode.north east) ++(-1,0) -- ++(0,3) -| (incY.south);
-        \draw[->] (skip.west) -- (incY.east);
-        \draw[->] (incY.west) -- (checkY);
-    \end{tikzpicture}
-\end{figure}
-This gives a good idea of the needed states in the FSMD. On the getgo two obvious optimisations can be done here. The y incrementor is constant with both writing operations, and can be split into these. We also see that the bordercases could be replaced by a single state using a more complex logical ciruit. The inner pixel check can also be merged into this state as it is still on the same control path and leads to the zerorising of the output pixel or the check for neighbouring pixels.\newline
-\cref{fig:fsmd} shows the state diagram.
-\begin{figure}[H]
-    \centering
-    \caption{State diagram of the erosion accelerator FSMD}\label{fig:fsmd}
-    \resizebox{\textwidth}{!}{%
-        \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
-            \tikzstyle{every state}=[fill={rgb:black,1;white,10}]
+    \resizebox{.7\textwidth}{!}{%
+        \begin{tikzpicture}[
+                roundnode/.style={rectangle, rounded corners=3mm, draw=black, fill={rgb:black,1;white,10}, very thick, minimum size=8mm},
+                squarednode/.style={rectangle, rounded corners=3mm, draw=black!60, fill={rgb:black,1;white,10}, very thick, minimum size=8mm},
+            ]
+            \node[squarednode]  (start)                                         {\texttt{Start}};
+            \node[roundnode]    (init)   [right = .5 of start, align = center]  {\texttt{x = 0}\\\texttt{y = 0}};
+            \node[roundnode]    (checkX) [above = .5 of init]                   {\texttt{x < 19}};
+            \node[squarednode]  (done)   [left = .5 of checkX]                  {\texttt{Done}};
+            \node[roundnode]    (incX)   [above = .5 of checkX, align = center] {\texttt{y = 0}\\\texttt{x++}};
+            \node[roundnode]    (checkY) [right = 1 of incX]                    {\texttt{y < 19}};
+            \node[roundnode]    (x0)     [below = .5 of checkY]                 {\texttt{if x == 0}};
+            \node[roundnode]    (x19)    [below = .5 of x0]                     {\texttt{if x == 19}};
+            \node[roundnode]    (y0)     [below = .5 of x19]                    {\texttt{if y == 0}};
+            \node[roundnode]    (y19)    [below = .5 of y0]                     {\texttt{if y == 19}};
+            \node[roundnode]    (inner)  [below = .5 of y19]                    {\texttt{if in\_image(x,y) == 0}};
+            \node[roundnode]    (erode)  [right = .5 of y0]                     {\texttt{out\_image(x,y) = 0}};
+            \node[roundnode]    (incY)   [right = .5 of checkY]                 {\texttt{y++}};
+            \node[roundnode]    (or)     [right = .5 of erode, align = right]   {\texttt{if in\_image(x-1,y) == 0}\\\texttt{|| in\_image(x+1,y) == 0}\\\texttt{|| in\_image(x,y-1) == 0}\\\texttt{|| in\_image(x,y+1) == 0}};
+            \node[roundnode]    (skip)   at (incY -| or)                        {\texttt{out\_image(x,y) = 255}};
 
-            \draw[black, thick] (11.5,-1.1) rectangle (14,3);
-            \node[below] at (12.75,3)  {\small\itshape\bfseries Default values};
-            \node[right] at (11.5,2.4) {\small adressReg = 0};
-            \node[right] at (11.5,2)   {\small dataReg = 0};
-            \node[right] at (11.5,1.6) {\small xreg = 0};
-            \node[right] at (11.5,1.2) {\small yreg = 0};
-            \node[right] at (11.5,.8)  {\small varReg = 0};
-            \node[right] at (11.5,.4)  {\small writeEnable = 0};
-            \node[right] at (11.5,0)   {\small address = 0};
-            \node[right] at (11.5,-.4) {\small dataWrite = 0};
-            \node[right] at (11.5,-.8) {\small done = 0};
-
-            \node[state, initial, accepting] (idle)                           {idle};
-            \node[state]                     (reginit) [right = 5 of idle]    {regInit};
-            \node[state]                     (count)   [below = 4 of reginit] {count};
-            \node[state, align=left]         (regup)   [left = 5 of count]    {reg\\Update};
-            \node[state]                     (done)    [right = 2 of reginit] {done};
-            \node[state, align=left]         (check)   [below right = 10 of count]   {check\\Pixel};
-            \node[state]                     (write)   [below left = 10 of count]   {write};
-
-            \path[->]
-            (idle)    edge [loop above] node                          {\textbf{start == 0} / \_}                ( )
-            (done)    edge [loop right] node                          {\textbf{True} / done = 1;}               ( )
-            (idle)    edge              node                          {\textbf{start == 1} / varReg = 20;}      (reginit)
-            (reginit) edge [loop above] node[align=right]             {\textbf{varReg < 60} / adress = varReg;
-                                                                       \\dataReg(varReg) = dataRead;
-                                                                       \\varReg++;}                             ( )
-            (reginit) edge              node[above left, align=right] {\textbf{varReg == 60}}                   (count)
-            (count)   edge [bend right] node[above]                   {\textbf{xReg == 20} / varReg = 0;}       (regup)
-            (regup)   edge [bend right] node[below, align=right]      {\textbf{varReg == 60} / yReg++;
-                                                                       \\xReg = 0;}                             (count)
-            (regup)   edge [loop above] node[align=right]             {\textbf{varReg < 40} / dataReg(varReg) =
-                                                                       \\dataReg(varReg + 20);
-                                                                       \\varReg++;}                             ( )
-            (regup)   edge [loop left]  node[align=right]             {\textbf{varReg < 60} / addressReg =
-                                                                       \\varReg + \(1 + 20 \ \times\) yReg;
-                                                                       \\address = addressReg;
-                                                                       \\dataReg(varReg) = dataRead;
-                                                                       \\varReg++;}                             ( )
-            (count)   edge              node[align=right]             {\textbf{xReg < 20} / addressReg =
-                                                                       \\\(x + 20 \times y + 400\);}            (check)
-            (count)   edge [bend right] node[below left, align=right] {\textbf{xReg == 0 || xReg == 19}
-                                                                       \\\textbf{|| yReg == 0 || yReg == 19}/
-                                                                       \\addressReg =
-                                                                       \\\(x + 20 \times y + 400\);
-                                                                       \\dataWrite = 0;}                        (write)
-            (check)   edge [bend left]  node[align=right]             {\textbf{dataReg(varReg) ||}
-                                                                       \\\textbf{dataReg(varReg - 20) ||}
-                                                                       \\\textbf{dataReg(varReg - 1) ||}
-                                                                       \\\textbf{dataReg(varReg + 1) ||}
-                                                                       \\\textbf{dataReg(varReg + 20) != 0} /
-                                                                       \\varReg = 255;}                         (write)
-            (check)   edge              node[above, align=right]      {\textbf{dataReg(varReg) ||}
-                                                                       \\\textbf{dataReg(varReg - 20) ||}
-                                                                       \\\textbf{dataReg(varReg - 1) ||}
-                                                                       \\\textbf{dataReg(varReg + 1) ||}
-                                                                       \\\textbf{dataReg(varReg + 20) == 0} /
-                                                                       \\varReg = 0;}                           (write)
-            (write)   edge[bend right]  node[right]                   {xReg++;}                                 (count)
-            (count)   edge              node[right]                   {\textbf{yReg == 20}}                     (done)
-            ;
+            \draw[->] (start.east) -- (init.west);
+            \draw[->] (init.north) -- (checkX.south);
+            \draw[->] (checkX.west) -- (done.east);
+            \draw[->] (checkX.north east) -- (checkY.south west);
+            \draw[->] (checkY.west) -- (incX.east);
+            \draw[->] (incX.south) -- (checkX.north);
+            \draw[->] (checkY.south) -- (x0.north);
+            \draw[->] (x0.south) -- (x19.north);
+            \draw[->] (x19.south) -- (y0.north);
+            \draw[->] (y0.south) -- (y19.north);
+            \draw[->] (y19.south) -- (inner.north);
+            \draw[->] (inner.east) -| (or.south);
+            \draw[->] (x0.east) -| (erode.north);
+            \draw[->] (x19.east) -- (erode.north west);
+            \draw[->] (y0.east) -- (erode.west);
+            \draw[->] (y19.east) -- (erode.south west);
+            \draw[->] (inner.north east) -- (erode.south |- y19.east) -- (erode.south);
+            \draw[->] (or.west) -- (erode.east);
+            \draw[->] (or.north) -- (skip.south);
+            \draw[->] (erode.north east) ++(-1,0) -- ++(0,3) -| (incY.south);
+            \draw[->] (skip.west) -- (incY.east);
+            \draw[->] (incY.west) -- (checkY);
         \end{tikzpicture}
     }%
 \end{figure}
-A list of registers are used to reduce read/write operations to/from the memory. The idea is to store three rows at a time, as to satisfy the erosion mask. On every iteration only one row is loaded into the register. The Register scheme is seen in \cref{fig:regs}.
-\begin{figure}[H]
+
+The diagram was then optimised:
+\begin{enumerate}
+    \item All the logical comparisons regarding the inner pixel and neighbours can be merged into a single state.
+    \item Incrementers and loop conditions can be merged into a single state.
+    \item Border check can be merged into the loop condition state.
+    \item Write operations can be merged into a single state.
+\end{enumerate}
+Next step focused on registers. The assignment allows O(x\_size) registers, and thus registers for three image rows are chosen. Once the rows are stored in the registers, a row can be processed with neighbouring pixels without reading from memory, limiting memory access. Furthermore registers for \texttt{x}, \texttt{y}, the memory address and a variable was decided upon. The variable register frees up tampering with \texttt{x} or \texttt{y} throughout the erosion (other than incrementing). The register layout is shown in \cref{fig:regs}.
+\begin{figure}
     \centering
     \caption{The registers in the accelerator}\label{fig:regs}
     \resizebox{.7\textwidth}{!}{%
@@ -349,19 +287,58 @@ A list of registers are used to reduce read/write operations to/from the memory.
         \end{tikzpicture}
     }%
 \end{figure}
-Furthermore registers are needed to store the memory address, the x and the y counters and a variable register to help with data register management. The state \texttt{regInit} initialises the data registers by filling R20-R59. The top row needs to be set to zero anyway. On every iteration the registers are updated as shown in \cref{fig:update}.
-\begin{figure}[H]
+
+This gives two development tasks:
+\begin{enumerate}
+    \item Registers needs to be initialised.
+    \item Registers needs to be updated on changing rows.
+\end{enumerate}
+Each task is solved by a separate state. An initialisation state will store pixels in the registers R20 to R59 as shown in \cref{fig:reginit}. On every row only the registers are used as shown in \cref{fig:regcheck}. Once the registers needs updating the register at position \(x\) is updated with the data in \(x+20\) for the first 40 registers, as shown in \cref{fig:regupdate1}. Once done the last 20 registers are updated with the next row from memory as shown in \cref{fig:regupdate2}.
+\begin{figure}
     \centering
-    \caption{Data register update}\label{fig:update}
+    \caption{Data register handling}\label{fig:update}
     \begin{subfigure}[t]{.35\textwidth}
-        \caption{Image rows move up}\label{fig:update1}
+        \centering
+        \caption{A row is analysed using the registers only}\label{fig:regcheck}
+        \resizebox{\textwidth}{!}{%
+            \begin{tikzpicture}
+                \draw[black, very thick]   (0,0)  rectangle (4,3);
+                \draw[step=1.0,black,thin] (0,0)  grid      (4,3);
+                \draw[DTUred, ultra thick, fill=DTUred] (0,1) -- (0,2) -- (1,2) -- (1,3) -- (2,3) -- (2,2) -- (3,2) -- (3,1) -- (2,1) -- (2,0) -- (1,0) -- (1,1) -- cycle;
+
+                \node (R0)    at (.5,2.5)   {R0};
+                \node (R1)    at (1.5,2.5)  {\textcolor{white}{R1}};
+                \node (R2)    at (2.5,2.5)  {R2};
+                \node (dots1) at (3.5,2.5)  {\(\cdots\)};
+
+                \node (R20)   at (.5,1.5)   {\textcolor{white}{R20}};
+                \node (R21)   at (1.5,1.5)  {\textcolor{white}{R21}};
+                \node (R22)   at (2.5,1.5)  {\textcolor{white}{R22}};
+                \node (dots2) at (3.5,1.5)  {\(\cdots\)};
+
+                \node (R40)   at (.5,.5)    {R40};
+                \node (R41)   at (1.5,.5)   {\textcolor{white}{R41}};
+                \node (R42)   at (2.5,.5)   {R42};
+                \node (dots3) at (3.5,.5)   {\(\cdots\)};
+
+                \node[below]  at (1.5,1.35)  {\footnotesize\textcolor{white}{\(x,y\)}};
+                \node[below]  at (1.5,2.4)  {\footnotesize\textcolor{white}{\(x,y-1\)}};
+                \node[below]  at (1.5,.4)   {\footnotesize\textcolor{white}{\(x,y+1\)}};
+                \node[below]  at (.5,1.4)   {\footnotesize\textcolor{white}{\(x-1,y\)}};
+                \node[below]  at (2.5,1.4)  {\footnotesize\textcolor{white}{\(x+1,y\)}};
+
+                \draw[ultra thick, ->] (0,-.5) -- node[below] {Iteration direction} (4,-.5);
+            \end{tikzpicture}
+        }%
+    \end{subfigure}
+    \hspace{5em}
+    \begin{subfigure}[t]{.35\textwidth}
+        \centering
+        \caption{Image rows moves up in registers only}\label{fig:regupdate1}
         \resizebox{\textwidth}{!}{%
             \begin{tikzpicture}
                 \draw[black, very thick]   (0,0) rectangle (4,3);
                 \draw[step=1.0,black,thin] (0,0) grid      (4,3);
-
-                \draw[black, very thick]   (0,-2) rectangle (4,-1);
-                \draw[step=1.0,black,thin] (0,-2) grid      (4,-1);
 
                 \node (R0)    at (.5,2.5)  {R0};
                 \node (R1)    at (1.5,2.5) {R1};
@@ -378,11 +355,6 @@ Furthermore registers are needed to store the memory address, the x and the y co
                 \node (R42)   at (2.5,.5)  {R42};
                 \node (dots3) at (3.5,.5)  {\(\cdots\)};
 
-                \node (mem1)  at (.5,-1.5)  {\small M(x,y)};
-                \node (mem2)  at (1.5,-1.5) {\small M(x,y)};
-                \node (mem3)  at (2.5,-1.5) {\small M(x,y)};
-                \node (dots4) at (3.5,-1.5) {\(\cdots\)};
-
                 \path[->]
                 (R20) edge [bend right] (R0)
                 (R21) edge [bend right] (R1)
@@ -393,9 +365,57 @@ Furthermore registers are needed to store the memory address, the x and the y co
             \end{tikzpicture}
         }%
     \end{subfigure}
+    \par\medskip
+    \begin{subfigure}[t]{.35\textwidth}
+        \centering
+        \caption{Image rows are initially read from memory}\label{fig:reginit}
+        \resizebox{\textwidth}{!}{%
+            \begin{tikzpicture}
+                \draw[black, very thick]   (0,0) rectangle (4,3);
+                \draw[step=1.0,black,thin] (0,0) grid      (4,3);
+
+                \draw[black, very thick]   (0,-3) rectangle (4,-1);
+                \draw[step=1.0,black,thin] (0,-3) grid      (4,-1);
+
+                \node (R0)    at (.5,2.5)  {R0};
+                \node (R1)    at (1.5,2.5) {R1};
+                \node (R2)    at (2.5,2.5) {R2};
+                \node (dots1) at (3.5,2.5) {\(\cdots\)};
+
+                \node (R20)   at (.5,1.5)  {R20};
+                \node (R21)   at (1.5,1.5) {R21};
+                \node (R22)   at (2.5,1.5) {R22};
+                \node (dots2) at (3.5,1.5) {\(\cdots\)};
+
+                \node (R40)   at (.5,.5)   {R40};
+                \node (R41)   at (1.5,.5)  {R41};
+                \node (R42)   at (2.5,.5)  {R42};
+                \node (dots3) at (3.5,.5)  {\(\cdots\)};
+
+                \node (M0)  at (.5,-1.5)  {\small M0};
+                \node (M1)  at (1.5,-1.5) {\small M1};
+                \node (M2)  at (2.5,-1.5) {\small M3};
+                \node (dots4) at (3.5,-1.5) {\(\cdots\)};
+
+                \node (M20)  at (.5,-2.5)  {\small M20};
+                \node (M21)  at (1.5,-2.5) {\small M21};
+                \node (M22)  at (2.5,-2.5) {\small M22};
+                \node (dots5) at (3.5,-2.5) {\(\cdots\)};
+
+                \path[->]
+                (M0)  edge [bend left]  (R20)
+                (M1)  edge [bend left]  (R21)
+                (M2)  edge [bend left]  (R22)
+                (M20) edge [bend right] (R40)
+                (M21) edge [bend right] (R41)
+                (M22) edge [bend right] (R42);
+            \end{tikzpicture}
+        }%
+    \end{subfigure}
     \hspace{5em}
     \begin{subfigure}[t]{.35\textwidth}
-        \caption{New image row from memory}\label{fig:update2}
+        \centering
+        \caption{New image row from memory is put into registers}\label{fig:regupdate2}
         \resizebox{\textwidth}{!}{%
             \begin{tikzpicture}
                 \draw[black, very thick]   (0,0)  rectangle (4,3);
@@ -432,18 +452,110 @@ Furthermore registers are needed to store the memory address, the x and the y co
         }%
     \end{subfigure}
 \end{figure}
+
+To recapitulate: The following states are needed
+\begin{itemize}
+    \item A state to initialise the registers with image rows.
+    \item A state to update the image rows when a row have been analysed and eroded.
+    \item A state to check if a pixel should be eroded.
+    \item A state to write the output image to memory.
+    \item A state to control incrementers.
+\end{itemize}
+The resulting FSMD is shown on the state diagram in \cref{fig:fsmd}.
+\begin{figure}
+    \centering
+    \caption{State diagram of the erosion accelerator FSMD}\label{fig:fsmd}
+    \resizebox{\textwidth}{!}{%
+        \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+            \tikzstyle{every state}=[fill={rgb:black,1;white,10}]
+
+            \draw[black, thick] (8,-1.1) rectangle (11,3);
+            \node[below] at (9.5,3) {\small\itshape\bfseries Default values};
+            \node[right] at (8,2.4) {\small adressReg = 0};
+            \node[right] at (8,2)   {\small dataReg = 0};
+            \node[right] at (8,1.6) {\small xreg = 0};
+            \node[right] at (8,1.2) {\small yreg = 0};
+            \node[right] at (8,.8)  {\small varReg = 0};
+            \node[right] at (8,.4)  {\small writeEnable = 0};
+            \node[right] at (8,0)   {\small address = 0};
+            \node[right] at (8,-.4) {\small dataWrite = 0};
+            \node[right] at (8,-.8) {\small done = 0};
+
+            \node[state, initial, accepting] (idle)                           {idle};
+            \node[state]                     (reginit) [right = 5 of idle]    {regInit};
+            \node[state]                     (count)   [below = 4 of reginit] {count};
+            \node[state, align=left]         (regup)   [left = 6 of count]    {reg\\Update};
+            \node[state]                     (done)    [right = 6 of count]   {done};
+            \node[state]                     (write)   [below = 6 of done]    {write};
+            \node[state, align=left]         (check)   [below = 10 of count]  {check\\Pixel};
+
+            \path[->]
+            (idle)    edge [loop above] node                          {\footnotesize\textbf{start == 0} / \_}                ( )
+            (done)    edge [loop above] node                          {\footnotesize\textbf{True} / done = 1;}               ( )
+            (idle)    edge              node                          {\footnotesize\textbf{start == 1} / varReg = 20;}      (reginit)
+            (reginit) edge [loop above] node[align=right]             {\footnotesize\textbf{varReg < 60} / adress = varReg;
+                    \\\footnotesize dataReg(varReg) = dataRead;
+                    \\\footnotesize varReg++;}                            ( )
+            (reginit) edge              node[above left, align=right] {\footnotesize\textbf{varReg == 60}}                   (count)
+            (count)   edge [bend right] node[above]                   {\footnotesize\textbf{xReg == 20} / varReg = 0;}       (regup)
+            (regup)   edge [bend right] node[below, align=right]      {\footnotesize\textbf{varReg == 60} / yReg++;
+                    \\\footnotesize xReg = 0;}                            (count)
+            (regup)   edge [loop above] node[align=right]             {\footnotesize\textbf{varReg < 40} / dataReg(varReg) =
+                    \\\footnotesize dataReg(varReg + 20);
+                    \\\footnotesize varReg++;}                            ( )
+            (regup)   edge [loop below] node[align=right]             {\footnotesize\textbf{varReg < 60} / addressReg =
+                    \\\footnotesize varReg + \(1 + 20 \ \times\) yReg;
+                    \\\footnotesize address = addressReg;
+                    \\\footnotesize dataReg(varReg) = dataRead;
+                    \\\footnotesize varReg++;}                            ( )
+            (count)   edge [bend right] node[left, align=right]       {\footnotesize\textbf{xReg < 20} / addressReg =
+                    \\\footnotesize\(x + 20 \times y + 400\);}            (check)
+            (count)   edge [bend left]  node[right, align=right]      {\footnotesize\textbf{xReg == 0 || xReg == 19}
+                    \\\footnotesize\textbf{|| yReg == 0 || yReg == 19}/
+                    \\\footnotesize addressReg =
+                    \\\footnotesize\(x + 20 \times y + 400\);
+                    \\\footnotesize dataWrite = 0;}                       (write)
+            (check)   edge              node[align=right]             {\footnotesize\textbf{dataReg(varReg) ||}
+                    \\\footnotesize\textbf{dataReg(varReg - 20) ||}
+                    \\\footnotesize\textbf{dataReg(varReg - 1) ||}
+                    \\\footnotesize\textbf{dataReg(varReg + 1) ||}
+                    \\\footnotesize\textbf{dataReg(varReg + 20) != 0} /
+                    \\\footnotesize varReg = 255;}                        (write)
+            (check)   edge [bend right] node[right, align=right]      {\footnotesize\textbf{dataReg(varReg) ||}
+                    \\\footnotesize\textbf{dataReg(varReg - 20) ||}
+                    \\\footnotesize\textbf{dataReg(varReg - 1) ||}
+                    \\\footnotesize\textbf{dataReg(varReg + 1) ||}
+                    \\\footnotesize\textbf{dataReg(varReg + 20) == 0} /
+                    \\\footnotesize varReg = 0;}                          (write)
+            (write)   edge              node[align=right]             {\footnotesize writeEnable = 1;
+                    \\\footnotesize adress = addressReg;
+                    \\\footnotesize dataWrite = varReg;
+                    \\\footnotesize xReg++;}                              (count)
+            (count)   edge              node[above]                   {\footnotesize\textbf{yReg == 20}}                     (done)
+            ;
+        \end{tikzpicture}
+    }%
+\end{figure}
+
 \section{Implementation}
 \textit{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question ``What does a reader need to know about your Chisel implementation?''}
 \\
 We implemented a feature where we could control the states with a Enum called stateReg which we make starts on idle. \\
-The way we use it its that all our functions is some when loops, that checks if the state is certain state, if so then run the specific function corresponds to that state. when everything have been ran, then the state becomes done. 
-\begin{center}
-    \includegraphics[]{Pictures/StateEnum.png}
-\end{center}
-
-
-
-
+The way we use it its that all our functions is some when loops, that checks if the state is certain state, if so then run the specific function corresponds to that state. when everything have been ran, then the state becomes done.
+% \begin{center}
+%     \includegraphics[]{Pictures/StateEnum.png}
+% \end{center}
+\begin{listing}[H]
+    \centering
+    \caption{stateReg}\label{lst:statereg}
+    \begin{minted}{scala}
+    // State enum and register
+    //     0 ::       1 ::     2 ::    3 ::         4 ::          5 ::     6 ::
+    val idle :: regInit :: count :: done :: regUpdate :: checkPixel :: write :: Nil =
+      Enum(7)
+    val stateReg = RegInit(idle)
+\end{minted}
+\end{listing}
 \section{Test And Evaluation}
 \textit{Report here the results from the test you have carried out. Present how you have tested (paper and pencil testing) the FSMD you have designed. Present the tests you have developed (if any). Remember to discuss the relusts and the test you have carried out, do not just present them, but explain and argue their meaning. Adress the design evaluation questions in Task 6 in the Assignment 3 document.}
 % \section{References}
