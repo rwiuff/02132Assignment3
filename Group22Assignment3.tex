@@ -539,34 +539,39 @@ The resulting FSMD is shown on the state diagram in \cref{fig:fsmd}.
 \end{figure}
 
 \section{Implementation}
-% \textit{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question ``What does a reader need to know about your Chisel implementation?''}
-
+The Chisel implementation is quite straight forward. Support registers are initialised and a state register is used to enumerate states. A switch statement is run, and setting a new state in the \texttt{stateReg} means the FSMD changes states. A thing to notice is the usage of a register vector to store the image row data, as shown in \cref{lst:regvec}.
 \begin{listing}[H]
     \centering
     \caption{stateReg}\label{lst:regvec}
-    \begin{minted}{scala}
+    \begin{minted}[linenos=false]{scala}
         val dataReg = Reg(Vec(60, UInt(32.W)))
 \end{minted}
 \end{listing}
-\todo{regvec}
-\begin{listing}[H]
-    \centering
-    \caption{stateReg}\label{lst:clockaround}
-    \begin{minted}{scala}
-        addressReg := varReg + 1.U + 20.U * (yReg)
-\end{minted}
-\end{listing}
-\todo{address + 1}
+Otherwise the FSMD is laid out in CHISEL as described in the diagram in \cref{fig:fsmd}.
 \section{Test And Evaluation}
 \textit{Report here the results from the test you have carried out. Present how you have tested (paper and pencil testing) the FSMD you have designed. Present the tests you have developed (if any). Remember to discuss the relusts and the test you have carried out, do not just present them, but explain and argue their meaning. Adress the design evaluation questions in Task 6 in the Assignment 3 document.}
+\subsection{Testing}
+The FSMD was first tested using white box testing for individual states. Afterwards a 4 by 4 picture was used to test the FSMD in hand. No problems were identified and the Chisel implementation was carried out. The next tests were purely based on looking into waveforms and proding the system. The first test (simulation) showed a shift on the x-axis of all output pixels. By investigating the waveforms we realised that the clock cycles are skewed as opposed to the last assignment. This test meant the FSMD and implementation needed to be altered to accomodate the memory chip, by adding a 1 to the read address. This can be seen in \cref{lst:add1}.
+\begin{listing}[H]
+    \centering
+    \caption{stateReg}\label{lst:regvec}
+    \begin{minted}[linenos=false]{scala}
+        val dataReg = Reg(Vec(60, UInt(32.W)))
+\end{minted}
+\end{listing}
 \subsection{Execution time and speed-up}
-
-Assignment 1 clock cyclese cell image 950x950:
 
 Assignment 2 clock cycles cell image 20x20: 6815
 
+We have checked how many cycles we are running through Assignment 2 and our FSMD is running at 2406 cycles at the same size picture of a cell image. so we can clearly see that we have gotten an significant boost in performance. 
 
+$\frac{6815}{2406} \times 100 = 283.25 \%$
 
+From this we can see that the program is 283.25 \% faster, that way its a significant performance boost. 
+
+$1 - \frac{2406}{6815}* 100 = 64.7 \% $
+
+That means that it using 64.7 \% less cycles to run.  
 
 
 \subsection{Utilisation of resources}
@@ -713,6 +718,7 @@ the utilisation of the functional units is determined. For the path in \cref{fig
         \bottomrule
     \end{tabular}
 \end{table}
+Most functional units are fairly shared between states, however few are only needed for the \texttt{checkPixel} state, as this state makes a bit more logical comparisons and arithemics. This state is the only one using subtraction. The conclusion is that some functional units can not be removed and as such some units have limited utilisation.
 \subsection{Hardware size}
 % \section{References}
 % \begin{thebibliography}{1}
