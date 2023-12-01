@@ -64,13 +64,13 @@
 \usepackage{pgfgantt}
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=tikz/]
-\usepackage{circuitikz}
-\ctikzset{logic ports = ieee}
+% \usepackage{circuitikz}
+% \ctikzset{logic ports = ieee}
 \usetikzlibrary{positioning,arrows,automata}
-\newcommand{\pin}[3]{\node[blue, font = \small, #2] at (#1) {#3};
-                     \coordinate (#3) at (#1);}
-\newcommand{\port}[4]{\node[circ, #2] (#1) {};
-                     \node[#3] at (#1) {#4};}
+% \newcommand{\pin}[3]{\node[blue, font = \small, #2] at (#1) {#3};
+                    %  \coordinate (#3) at (#1);}
+% \newcommand{\port}[4]{\node[circ, #2] (#1) {};
+                    %  \node[#3] at (#1) {#4};}
 %Header footer
 \usepackage{fancyhdr}
 \pagestyle{fancy}
@@ -185,7 +185,6 @@
     \end{tabular}
 \end{table}
 \section{Design}
-% \textit{Explain here what the design process was. Show the state diagram of the FSMD and explain and motivate you design decisions.}
 First a CFG was generated from the pseudocode in the assignment material, yielding the graph in \cref{fig:cfg}.
 \begin{figure}[H]
     \centering
@@ -240,11 +239,11 @@ First a CFG was generated from the pseudocode in the assignment material, yieldi
 The diagram was then optimised:
 \begin{enumerate}
     \item All the logical comparisons regarding the inner pixel and neighbours can be merged into a single state.
-    \item Incrementers and loop conditions can be merged into a single state.
+    \item Incrementors and loop conditions can be merged into a single state.
     \item Border check can be merged into the loop condition state.
     \item Write operations can be merged into a single state.
 \end{enumerate}
-Next step focused on registers. The assignment allows O(x\_size) registers, and thus registers for three image rows are chosen. Once the rows are stored in the registers, a row can be processed with neighbouring pixels without reading from memory, limiting memory access. Furthermore registers for \texttt{x}, \texttt{y}, the memory address and a variable was decided upon. The variable register frees up tampering with \texttt{x} or \texttt{y} throughout the erosion (other than incrementing). The register layout is shown in \cref{fig:regs}.
+Next step focused on registers. The assignment allows O(x\_size) registers, and thus registers for three image rows are chosen. Once the rows are stored in the registers, a row can be processed with neighbouring pixels without reading from memory, limiting memory access. Furthermore, registers for \texttt{x}, \texttt{y}, the memory address and a variable was decided upon. The variable register frees up tampering with \texttt{x} or \texttt{y} throughout the erosion (other than incrementing). The register layout is shown in \cref{fig:regs}.
 \begin{figure}
     \centering
     \caption{The registers in the accelerator}\label{fig:regs}
@@ -291,14 +290,14 @@ Next step focused on registers. The assignment allows O(x\_size) registers, and 
 
 This gives two development tasks:
 \begin{enumerate}
-    \item Registers needs to be initialised.
-    \item Registers needs to be updated on changing rows.
+    \item Registers need to be initialised.
+    \item Registers need to be updated on changing rows.
 \end{enumerate}
 Each task is solved by a separate state. An initialisation state will store pixels in the registers R20 to R59 as shown in \cref{fig:reginit}. On every row only the registers are used as shown in \cref{fig:regcheck}. Once the registers needs updating the register at position \(x\) is updated with the data in \(x+20\) for the first 40 registers, as shown in \cref{fig:regupdate1}. Once done the last 20 registers are updated with the next row from memory as shown in \cref{fig:regupdate2}.
-\begin{figure}
+\begin{figure}[H]
     \centering
     \caption{Data register handling}\label{fig:update}
-    \begin{subfigure}[t]{.35\textwidth}
+    \begin{subfigure}[t]{.3\textwidth}
         \centering
         \caption{A row is analysed using the registers only}\label{fig:regcheck}
         \resizebox{\textwidth}{!}{%
@@ -328,12 +327,12 @@ Each task is solved by a separate state. An initialisation state will store pixe
                 \node[below]  at (.5,1.4)   {\footnotesize\textcolor{white}{\(x-1,y\)}};
                 \node[below]  at (2.5,1.4)  {\footnotesize\textcolor{white}{\(x+1,y\)}};
 
-                \draw[ultra thick, ->] (0,-.5) -- node[below] {Iteration direction} (4,-.5);
+                \draw[ultra thick, ->] (.5,-.4) -- node[below] {\small Iteration direction} (3.5,-.4);
             \end{tikzpicture}
         }%
     \end{subfigure}
     \hspace{5em}
-    \begin{subfigure}[t]{.35\textwidth}
+    \begin{subfigure}[t]{.3\textwidth}
         \centering
         \caption{Image rows moves up in registers only}\label{fig:regupdate1}
         \resizebox{\textwidth}{!}{%
@@ -367,7 +366,7 @@ Each task is solved by a separate state. An initialisation state will store pixe
         }%
     \end{subfigure}
     \par\medskip
-    \begin{subfigure}[t]{.35\textwidth}
+    \begin{subfigure}[t]{.3\textwidth}
         \centering
         \caption{Image rows are initially read from memory}\label{fig:reginit}
         \resizebox{\textwidth}{!}{%
@@ -414,9 +413,9 @@ Each task is solved by a separate state. An initialisation state will store pixe
         }%
     \end{subfigure}
     \hspace{5em}
-    \begin{subfigure}[t]{.35\textwidth}
+    \begin{subfigure}[t]{.3\textwidth}
         \centering
-        \caption{New image row from memory is put into registers}\label{fig:regupdate2}
+        \caption{Registers populated with new image row}\label{fig:regupdate2}
         \resizebox{\textwidth}{!}{%
             \begin{tikzpicture}
                 \draw[black, very thick]   (0,0)  rectangle (4,3);
@@ -452,18 +451,17 @@ Each task is solved by a separate state. An initialisation state will store pixe
             \end{tikzpicture}
         }%
     \end{subfigure}
-\end{figure}
-
+\end{figure}\newpage
 To recapitulate: The following states are needed
 \begin{itemize}
     \item A state to initialise the registers with image rows.
     \item A state to update the image rows when a row have been analysed and eroded.
     \item A state to check if a pixel should be eroded.
     \item A state to write the output image to memory.
-    \item A state to control incrementers.
+    \item A state to control incrementors.
 \end{itemize}
 The resulting FSMD is shown on the state diagram in \cref{fig:fsmd}.
-\begin{figure}
+\begin{figure}[H]
     \centering
     \caption{State diagram of the erosion accelerator FSMD}\label{fig:fsmd}
     \resizebox{\textwidth}{!}{%
@@ -539,7 +537,7 @@ The resulting FSMD is shown on the state diagram in \cref{fig:fsmd}.
 \end{figure}
 
 \section{Implementation}
-The Chisel implementation is quite straight forward. Support registers are initialised and a state register is used to enumerate states. A switch statement is run, and setting a new state in the \texttt{stateReg} means the FSMD changes states. A thing to notice is the usage of a register vector to store the image row data, as shown in \cref{lst:regvec}.
+The Chisel implementation is quite straight forward. Support registers are initialised, and a state register is used to enumerate states. A switch statement is run, and setting a new state in the \texttt{stateReg} means the FSMD changes states. A thing to notice is the usage of a register vector to store the image row data, as shown in \cref{lst:regvec}.
 \begin{listing}[H]
     \centering
     \caption{Image data register defined in Chisel}\label{lst:regvec}
@@ -547,11 +545,10 @@ The Chisel implementation is quite straight forward. Support registers are initi
         val dataReg = Reg(Vec(60, UInt(32.W)))
 \end{minted}
 \end{listing}
-Otherwise the FSMD is laid out in CHISEL as described in the diagram in \cref{fig:fsmd}.
+Otherwise, the FSMD is laid out in Chisel as described in the diagram in \cref{fig:fsmd}.
 \section{Test And Evaluation}
-\textit{Report here the results from the test you have carried out. Present how you have tested (paper and pencil testing) the FSMD you have designed. Present the tests you have developed (if any). Remember to discuss the relusts and the test you have carried out, do not just present them, but explain and argue their meaning. Adress the design evaluation questions in Task 6 in the Assignment 3 document.}
 \subsection{Testing}
-The FSMD was first tested using white box testing for individual states. Afterwards a 4 by 4 picture was used to test the FSMD in hand. No problems were identified and the Chisel implementation was carried out. The next tests were purely based on looking into waveforms and proding the system. The first test (simulation) showed a shift on the x-axis of all output pixels. By investigating the waveforms we realised that the clock cycles are skewed as opposed to the last assignment. This test meant the FSMD and implementation needed to be altered to accomodate the memory chip, by adding a 1 to the read address. This can be seen in \cref{lst:add1}.
+The FSMD was first tested using white box testing for individual states. Afterwards a 4 by 4 picture was used to test the FSMD in hand. No problems were identified, and the Chisel implementation was carried out. The next tests were purely based on looking into waveforms and prodding the system. The first test (simulation) showed a shift on the x-axis of all output pixels. By investigating the waveforms we realised that the clock cycles are skewed as opposed to the last assignment. This test meant the FSMD and implementation needed to be altered to accommodate the memory chip, by adding a 1 to the read address. This can be seen in \cref{lst:add1}.
 \begin{listing}[H]
     \centering
     \caption{Alteration to fix clock cycle latency}\label{lst:add1}
@@ -560,14 +557,14 @@ The FSMD was first tested using white box testing for individual states. Afterwa
 \end{minted}
 \end{listing}
 \subsection{Execution time and speed-up}
-In assignment 2 the clock cycles for the cell image of 20\(\times\)20 pixels was 6815. The FSMD based hardware accelerator is running at 2406 cycles for the same picture. So we can clearly see that we have gotten an significant boost in performance. \cref{eq:perf} shows the relative increase.
+In assignment 2 the clock cycles for the cell image of 20\(\times\)20 pixels was 6815. The FSMD based hardware accelerator is running at 2406 cycles for the same picture. So we can clearly see that we have got a significant boost in performance. \cref{eq:perf} shows the relative increase.
 \begin{align}
-\frac{6815}{2406} \times 100 = 283.25 \% \label{eq:perf}
+    \frac{6815}{2406} \times 100 = 283.25 \% \label{eq:perf}
 \end{align}\newline
-From this we can see that the program is 283.25 \% faster, that way its a significant performance boost. The increase in performance is calculated in \cref{eq:increase}.
+From this we can see that the program is 283.25 \% faster, that way it is a significant performance boost. The increase in performance is calculated in \cref{eq:increase}.
 
 \begin{align}
-1 - \frac{2406}{6815} \times 100 = 64.7 \% \label{eq:increase}
+    1 - \frac{2406}{6815} \times 100 = 64.7 \% \label{eq:increase}
 \end{align}\newline
 This means the accelerator gives an increased performance of 64.47 \%.
 
@@ -603,8 +600,8 @@ The highest number of units are summarised in \cref{tbl:functotal}.
         \bottomrule
     \end{tabular}
 \end{table}
-The longest path begins when the pixel registers are updated and during analysis throughout the row. The path is defined as \texttt{regUpdate} \(\rightarrow\) \texttt{count} \(\rightarrow\) \texttt{checkPixel} \(\rightarrow\) \texttt{write} \(\rightarrow\) \texttt{count}. The utilised resources in this path is shown in \cref{fig:pixelpath}.
-\begin{figure}
+The longest path begins when the pixel registers are updated and during analysis throughout the row. The path is defined as \texttt{regUpdate} \(\rightarrow\) \texttt{count} \(\rightarrow\) \texttt{checkPixel} \(\rightarrow\) \texttt{write} \(\rightarrow\) \texttt{count}. The utilised resources in this path are shown in \cref{fig:pixelpath}.
+\begin{figure}[H]
     \centering
     \caption{Schedule of functional units in the longest FSMD path}\label{fig:pixelpath}
     \begin{ganttchart}[
@@ -693,7 +690,7 @@ The longest path begins when the pixel registers are updated and during analysis
     \end{ganttchart}
 \end{figure}
 
-Using the formula for the functional units,
+Using the utilisation formula for the functional units,
 
 \begin{align}
     \frac{\text{\# of states when its used}}{\text{\# of states when it is used} + \text{\# of states when it is not used}}
@@ -717,30 +714,24 @@ the utilisation of the functional units is determined. For the path in \cref{fig
 \end{table}
 Most functional units are fairly shared between states, however few are only needed for the \texttt{checkPixel} state, as this state makes a bit more logical comparisons and arithemics. This state is the only one using subtraction. The conclusion is that some functional units can not be removed and as such some units have limited utilisation.
 \subsection{Hardware size}
-One 16 bit register is used for the memory address. The number of circuits in this design is listed in \cref{tbl:circuits}.
-\begin{table}[]
+All operations need to deal with numbers no larger than 255, which means an 8 bit size is suitable. However, the memory addresses needs to go to 799, meaning the memory address register needs to be of size 16. There are two options. Either the functional units are of size 16 or a padding circuit is introduced before each memory address is computed. We chose the first option. A circuit overview is seen in \cref{tbl:circuits}.
+\begin{table}[H]
     \centering
-        \caption{Overview of circuits in the accelerator}\label{tbl:circuits}
-    \begin{tabular}{c|c}
-         \toprule
-            Circuit & Number & Bit size \\
-         \midrule
-         Register & 1 & 16 \\
-            Register & 63 & 8 \\
-            Comparator (\(=\)) &6& 8 \\
-            Comparator (\(<\)) &2& 8 \\
-            Logic OR & 4 & 8\\
-            Adder & 3 & 8\\
-            Subtractor & 2 & 8\\
-            Multiplicator & 1 & 8\\
-         \bottomrule
+    \caption{Overview of circuits in the accelerator}\label{tbl:circuits}
+    \begin{tabular}{lll}
+        \toprule
+        Circuit            & Number & Bit size \\
+        \midrule
+        Register           & 64     & 16       \\
+        Comparator (\(=\)) & 6      & 16       \\
+        Comparator (\(<\)) & 2      & 16       \\
+        Logic OR           & 4      & 16       \\
+        Adder              & 3      & 16       \\
+        Subtractor         & 2      & 16       \\
+        Multiplicator      & 1      & 16       \\
+        \bottomrule
     \end{tabular}
 \end{table}
-        \toprule
-        \(=\) & \(<\) & \(||\) & \(+\) & \(-\) & \(\times\) \\
-        \midrule
-        6     & 2     & 4      & 3     & 2     & 1          \\
-        \bottomrule
 % \section{References}
 % \begin{thebibliography}{1}
 %     \bibitem{arduino}
