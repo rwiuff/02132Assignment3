@@ -547,19 +547,52 @@ The way we use it its that all our functions is some when loops, that checks if 
 % \end{center}
 \begin{listing}[H]
     \centering
-    \caption{stateReg}\label{lst:statereg}
+    \caption{stateReg}\label{lst:regvec}
     \begin{minted}{scala}
-    // State enum and register
-    //     0 ::       1 ::     2 ::    3 ::         4 ::          5 ::     6 ::
-    val idle :: regInit :: count :: done :: regUpdate :: checkPixel :: write :: Nil =
-      Enum(7)
-    val stateReg = RegInit(idle)
+        val dataReg = Reg(Vec(60, UInt(32.W)))
 \end{minted}
 \end{listing}
+\todo{regvec}
+\begin{listing}[H]
+    \centering
+    \caption{stateReg}\label{lst:clockaround}
+    \begin{minted}{scala}
+        addressReg := varReg + 1.U + 20.U * (yReg)
+\end{minted}
+\end{listing}
+\todo{address + 1}
 \section{Test And Evaluation}
 \textit{Report here the results from the test you have carried out. Present how you have tested (paper and pencil testing) the FSMD you have designed. Present the tests you have developed (if any). Remember to discuss the relusts and the test you have carried out, do not just present them, but explain and argue their meaning. Adress the design evaluation questions in Task 6 in the Assignment 3 document.}
+\subsection{Execution time and speed-up}
+
+Assignment 1 clock cyclese cell image 950x950: 
+
+Assignment 2 clock cycles cell image 20x20: 6815
 
 
+
+
+
+\subsection{Utilisation of resources}
+The number of needed functional units are derived from the state diagram in \cref{fig:fsmd}. \cref{tbl:funcunits} depicts units used by various states.
+\begin{table}[H]
+    \centering
+    \caption{Number of functional units used in states}\label{tbl:funcunits}
+    \begin{tabular}{lllllll}
+    \toprule
+    State      & \(=\) & \(<\) & \(||\) & \(+\) & \(\times\) & \(\neq\) \\
+    \midrule
+    idle       &     1 &       &        &       &            &        \\
+    done       &       &       &        &       &            &        \\
+    regInit    &     1 &     1 &        &     1 &            &        \\
+    regUpdate  &     1 &     2 &        &     4 &          1 &        \\
+    count      &       &       &        &       &            &        \\
+    checkPixel &       &       &        &       &            &        \\
+    write      &       &       &        &       &            &        \\
+    \bottomrule
+    \end{tabular}
+\end{table}
+\subsection{Hardware size}
 % \section{References}
 % \begin{thebibliography}{1}
 %     \bibitem{arduino}
