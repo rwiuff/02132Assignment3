@@ -61,6 +61,7 @@
 \usepackage{multirow}
 \usepackage{fontawesome}
 \usepackage{tikz}
+\usepackage{pgfgantt}
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=tikz/]
 \usepackage{circuitikz}
@@ -538,13 +539,8 @@ The resulting FSMD is shown on the state diagram in \cref{fig:fsmd}.
 \end{figure}
 
 \section{Implementation}
-\textit{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question ``What does a reader need to know about your Chisel implementation?''}
-\\
-We implemented a feature where we could control the states with a Enum called stateReg which we make starts on idle. \\
-The way we use it its that all our functions is some when loops, that checks if the state is certain state, if so then run the specific function corresponds to that state. when everything have been ran, then the state becomes done.
-% \begin{center}
-%     \includegraphics[]{Pictures/StateEnum.png}
-% \end{center}
+% \textit{Briefly discuss the implementation in Chisel of your design. You can include some code snippets if these are relevant to explain certain aspects of the implementation. In other words, try to answer the question ``What does a reader need to know about your Chisel implementation?''}
+
 \begin{listing}[H]
     \centering
     \caption{stateReg}\label{lst:regvec}
@@ -565,7 +561,7 @@ The way we use it its that all our functions is some when loops, that checks if 
 \textit{Report here the results from the test you have carried out. Present how you have tested (paper and pencil testing) the FSMD you have designed. Present the tests you have developed (if any). Remember to discuss the relusts and the test you have carried out, do not just present them, but explain and argue their meaning. Adress the design evaluation questions in Task 6 in the Assignment 3 document.}
 \subsection{Execution time and speed-up}
 
-Assignment 1 clock cyclese cell image 950x950: 
+Assignment 1 clock cyclese cell image 950x950:
 
 Assignment 2 clock cycles cell image 20x20: 6815
 
@@ -579,17 +575,142 @@ The number of needed functional units are derived from the state diagram in \cre
     \centering
     \caption{Number of functional units used in states}\label{tbl:funcunits}
     \begin{tabular}{lllllll}
-    \toprule
-    State      & \(=\) & \(<\) & \(||\) & \(+\) & \(\times\) & \(\neq\) \\
-    \midrule
-    idle       &     1 &       &        &       &            &        \\
-    done       &       &       &        &       &            &        \\
-    regInit    &     1 &     1 &        &     1 &            &        \\
-    regUpdate  &     1 &     2 &        &     4 &          1 &        \\
-    count      &       &       &        &       &            &        \\
-    checkPixel &       &       &        &       &            &        \\
-    write      &       &       &        &       &            &        \\
-    \bottomrule
+        \toprule
+        State      & \(=\) & \(<\) & \(||\) & \(+\) & \(-\) & \(\times\) \\
+        \midrule
+        idle       & 1     &       &        &       &       &            \\
+        done       &       &       &        &       &       &            \\
+        regInit    & 1     & 1     &        & 1     &       &            \\
+        regUpdate  & 1     & 2     &        & 3     &       & 1          \\
+        count      & 6     & 1     & 3      & 2     &       & 1          \\
+        checkPixel & 4     &       & 4      & 2     & 2     &            \\
+        write      &       &       &        & 1     &       &            \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The highest number of units are summarised in \cref{tbl:functotal}.
+\begin{table}[H]
+    \centering
+    \caption{Total number of functional units in the FSMD}\label{tbl:functotal}
+    \begin{tabular}{llllllllllllll}
+        \toprule
+        \(=\) & \(<\) & \(||\) & \(+\) & \(-\) & \(\times\) \\
+        \midrule
+        6     & 2     & 4      & 3     & 2     & 1          \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+The longest path begins when the pixel registers are updated and during analysis throughout the row. The path is defined as \texttt{regUpdate} \(\rightarrow\) \texttt{count} \(\rightarrow\) \texttt{checkPixel} \(\rightarrow\) \texttt{write} \(\rightarrow\) \texttt{count}. The utilised resources in this path is shown in \cref{fig:pixelpath}.
+\begin{figure}
+    \centering
+    \caption{Schedule of functional units in the longest FSMD path}\label{fig:pixelpath}
+    \begin{ganttchart}[
+            x unit=0.7cm,
+            y unit chart=0.7cm,
+            canvas/.style={draw=none,fill=none}, % remove canvas borders, etc
+            vgrid={*1{draw=black!12}},           % vertical gray lines every unit
+            inline,                              % draw bars inline
+            group/.style={draw=none,fill=none},  % remove group borders, etc
+            y unit title=.5cm,                   % crop titles a little smaller
+            title/.style={draw=none,fill=none},  % remove title borders, etc
+            include title in canvas=false,       % no vertical grid in title
+            bar/.append style={fill=red, rounded corners=2pt},
+            bar left shift=.15,
+            bar right shift=-.15,
+            bar top shift=.4,
+            bar height=.2
+        ]{-1}{10}
+
+        \gantttitle{\texttt{regupdate}}{3}
+        \gantttitle{\texttt{count}}{3}
+        \gantttitle{\texttt{checkPixel}}{3}
+        \gantttitle{\texttt{write}}{3}
+        \\
+
+        \ganttgroup[inline=false]{\(=_1\)}{0}{1}
+        \ganttbar{}{0}{6}
+        \\
+        \ganttgroup[inline=false]{\(=_2\)}{0}{1}
+        \ganttbar{}{3}{6}
+        \\
+        \ganttgroup[inline=false]{\(=_3\)}{0}{1}
+        \ganttbar{}{3}{6}
+        \\
+        \ganttgroup[inline=false]{\(=_4\)}{0}{1}
+        \ganttbar{}{3}{6}
+        \\
+        \ganttgroup[inline=false]{\(=_5\)}{0}{1}
+        \ganttbar{}{3}{6}
+        \\
+        \ganttgroup[inline=false]{\(=_6\)}{0}{1}
+        \ganttbar{}{3}{3}
+        \\
+
+        \ganttgroup[inline=false]{\(<_1\)}{0}{1}
+        \ganttbar{}{0}{3}
+        \\
+        \ganttgroup[inline=false]{\(<_2\)}{0}{1}
+        \ganttbar{}{0}{0}
+        \\
+
+        \ganttgroup[inline=false]{\(||_1\)}{0}{1}
+        \ganttbar{}{3}{6}
+        \\
+        \ganttgroup[inline=false]{\(||_2\)}{0}{1}
+        \ganttbar{}{3}{6}
+        \\
+        \ganttgroup[inline=false]{\(||_3\)}{0}{1}
+        \ganttbar{}{3}{6}
+        \\
+        \ganttgroup[inline=false]{\(||_4\)}{0}{1}
+        \ganttbar{}{6}{6}
+        \\
+
+        \ganttgroup[inline=false]{\(+_1\)}{0}{1}
+        \ganttbar{}{0}{9}
+        \\
+        \ganttgroup[inline=false]{\(+_2\)}{0}{1}
+        \ganttbar{}{0}{6}
+        \\
+        \ganttgroup[inline=false]{\(+_3\)}{0}{1}
+        \ganttbar{}{0}{0}
+        \\
+
+        \ganttgroup[inline=false]{\(-_1\)}{0}{1}
+        \ganttbar{}{6}{6}
+        \\
+
+        \ganttgroup[inline=false]{\(-_2\)}{0}{1}
+        \ganttbar{}{6}{6}
+        \\
+
+        \ganttgroup[inline=false]{\(\times\)}{0}{1}
+        \ganttbar{}{0}{3}
+
+    \end{ganttchart}
+\end{figure}
+
+Using the formula for the functional units,
+
+\begin{align}
+    \frac{\text{\# of states when its used}}{\text{\# of states when it is used} + \text{\# of states when it is not used}}
+\end{align}
+\newline
+the utilisation of the functional units is determined. For the path in \cref{fig:pixelpath} the utilisation is given in \cref{tbl:utilpixel}.
+\begin{table}[H]
+    \centering
+    \caption{Utilisation of functional units in the longest FSMD path}\label{tbl:utilpixel}
+    \begin{tabular}{lllllllllllllllllll}
+        \toprule
+        Functional unit & \(=_1\) & \(=_2\) & \(=_3\) & \(=_4\) & \(=_5\) & \(=_6\)    & \(<_1\)  & \(<_2\)  & \(||_1\) \\
+        \midrule
+        Utilisation     & 0.75    & 0.5     & 0.5     & 0.5     & 0.5     & 0.25       & 0.5      & 0.25     & 0.5      \\
+        \midrule
+        Functional unit & \(+_1\) & \(+_2\) & \(+_3\) & \(-_1\) & \(-_2\) & \(\times\) & \(||_2\) & \(||_3\) & \(||_4\) \\
+        \midrule
+        Utilisation     & 1       & 0.75    & 0.25    & 0.25    & 0.25    & 0.5        & 0.5      & 0.5      & 0.25     \\
+        \bottomrule
     \end{tabular}
 \end{table}
 \subsection{Hardware size}
