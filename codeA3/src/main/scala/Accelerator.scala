@@ -20,10 +20,10 @@ class Accelerator extends Module {
 
   // Support registers
   val addressReg = RegInit(0.U(16.W))
-  val dataReg = Reg(Vec(60, UInt(32.W)))
-  val xReg = RegInit(0.U(32.W))
-  val yReg = RegInit(0.U(32.W))
-  val varReg = RegInit(0.U(32.W))
+  val dataReg = Reg(Vec(60, UInt(16.W)))
+  val xReg = RegInit(0.U(16.W))
+  val yReg = RegInit(0.U(16.W))
+  val varReg = RegInit(0.U(16.W))
 
   // Default values
   io.writeEnable := false.B
