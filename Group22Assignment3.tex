@@ -717,7 +717,7 @@ the utilisation of the functional units is determined. For the path in \cref{fig
 \end{table}
 Most functional units are fairly shared between states, however few are only needed for the \texttt{checkPixel} state, as this state makes a bit more logical comparisons and arithemics. This state is the only one using subtraction. The conclusion is that some functional units can not be removed and as such some units have limited utilisation.
 \subsection{Hardware size}
-The number of circuits in this design is listed in \cref{tbl:circuits}
+One 16 bit register is used for the memory address. The number of circuits in this design is listed in \cref{tbl:circuits}.
 \begin{table}[]
     \centering
         \caption{Overview of circuits in the accelerator}\label{tbl:circuits}
@@ -727,6 +727,12 @@ The number of circuits in this design is listed in \cref{tbl:circuits}
          \midrule
          Register & 1 & 16 \\
             Register & 63 & 8 \\
+            Comparator (\(=\)) &6& 8 \\
+            Comparator (\(<\)) &2& 8 \\
+            Logic OR & 4 & 8\\
+            Adder & 3 & 8\\
+            Subtractor & 2 & 8\\
+            Multiplicator & 1 & 8\\
          \bottomrule
     \end{tabular}
 \end{table}
